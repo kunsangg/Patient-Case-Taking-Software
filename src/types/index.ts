@@ -26,6 +26,12 @@ export interface PatientCase {
   alerts: Alert[];
   missingInformation: string[];
   contradictions: Contradiction[];
+  aiAnalysis?: {
+    triageLevel: "Low" | "Medium" | "High" | "Critical";
+    clinicalSummary: string;
+    differentialDiagnosis: string[];
+    recommendedQuestions: string[];
+  };
 }
 
 export interface Medication {
@@ -49,6 +55,7 @@ export interface MedicalDocument {
   id: string;
   type: string;
   extractedData: Record<string, unknown>;
+  fileData?: string; // Base64 data URI of the uploaded file
 }
 
 export interface TimelineEvent {

@@ -34,6 +34,12 @@ const initialCase: PatientCase = {
   alerts: [],
   missingInformation: [],
   contradictions: [],
+  aiAnalysis: {
+    triageLevel: "Low",
+    clinicalSummary: '',
+    differentialDiagnosis: [],
+    recommendedQuestions: [],
+  },
 };
 
 export const useStore = create<AppState & { screenHistory: number[] }>((set) => ({
