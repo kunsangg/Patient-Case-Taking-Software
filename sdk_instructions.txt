@@ -1,0 +1,133 @@
+Documentation Index
+Fetch the complete documentation index at: /llms.txt
+Use this file to discover all available pages before exploring further.
+Authorization
+End-to-End Encryption
+Connect
+HealthAI
+Medical Database
+ABDM Connect
+Doctor Tool
+Medical Knowledge-bases
+Medical Records
+User App
+On this page
+Get Started
+Complete implementation guide for the ABHA[Ayushman Bharat Digital Mission] SDK
+​ ABHA SDK - Implementation
+​ Overview
+​ Installation
+​ Prerequisites
+​ Setup
+https://unpkg.com/@eka-care/abha-stg/dist/sdk/abha/js/abha.js
+https://unpkg.com/@eka-care/abha-stg/dist/sdk/abha/css/abha.css
+<! DOCTYPE html > < html > < head > < title > ABHA SDK Integration </ title > <!-- Include ABHA SDK CSS --> < link rel = "stylesheet" href = "https://unpkg.com/@eka-care/abha/dist/sdk/abha/css/abha.css" /> </ head > < body > < h1 > ABHA SDK Demo </ h1 > <!-- Mount Button --> < button class = "button" onclick = " mountABHASDK ()" > Mount SDK </ button > <!-- Container for ABHA SDK --> < div id = "sdk_container" ></ div > <!-- Include ABHA SDK JS --> < script type = "module" src = "https://unpkg.com/@eka-care/abha/dist/sdk/abha/js/abha.js" ></ script > < script > function mountABHASDK () { window . initAbhaApp ({ containerId: "sdk_container" , clientId: "ext" , // theme object theme: { // pass only the tokens you want to override }, // data object data: { // pass the required data as per the flow }, // Success callback onSuccess : ( params ) => { console . log ( "ABHA Registration flow completed successfully:" , params , ); }, //KYC Successs callback onKYCSuccess : ( params ) => { console . log ( "ABHA KYC Verified successfully:" , params ); }, //Consent Successs callback onConsentSuccess : ( params ) => { console . log ( "ABHA Consent flow completed successfully:" , params ); }, // Scan & Share Success callback onAppointmentBookedSuccess : ( params ) => { console . log ( "Appointment Booked successfully:" , params ); }, // Skip ABHA callback onSkipAbha : ( params ) => { console . log ( "ABHA flow SKIPPED:" , params ); }, // Abha Close callback onAbhaClose : () => { console . log ( "ABHA SDK closed" ); }, // Error callback onError : ( params ) => { console . error ( "ABHA SDK failed:" , params ); }, }); } </ script > </ body > </ html >
+<! DOCTYPE html > < html > < head > < title > ABHA SDK Integration </ title > <!-- Include ABHA SDK CSS --> < link rel = "stylesheet" href = "https://unpkg.com/@eka-care/abha/dist/sdk/abha/css/abha.css" /> </ head > < body > < h1 > ABHA SDK Demo </ h1 > <!-- Mount Button --> < button class = "button" onclick = " mountABHASDK ()" > Mount SDK </ button > <!-- Container for ABHA SDK --> < div id = "sdk_container" ></ div > <!-- Include ABHA SDK JS --> < script type = "module" src = "https://unpkg.com/@eka-care/abha/dist/sdk/abha/js/abha.js" ></ script > < script > function mountABHASDK () { window . initAbhaApp ({ containerId: "sdk_container" , clientId: "ext" , // theme object theme: { // pass only the tokens you want to override }, // data object data: { // pass the required data as per the flow }, // Success callback onSuccess : ( params ) => { console . log ( "ABHA Registration flow completed successfully:" , params , ); }, //KYC Successs callback onKYCSuccess : ( params ) => { console . log ( "ABHA KYC Verified successfully:" , params ); }, //Consent Successs callback onConsentSuccess : ( params ) => { console . log ( "ABHA Consent flow completed successfully:" , params ); }, // Scan & Share Success callback onAppointmentBookedSuccess : ( params ) => { console . log ( "Appointment Booked successfully:" , params ); }, // Skip ABHA callback onSkipAbha : ( params ) => { console . log ( "ABHA flow SKIPPED:" , params ); }, // Abha Close callback onAbhaClose : () => { console . log ( "ABHA SDK closed" ); }, // Error callback onError : ( params ) => { console . error ( "ABHA SDK failed:" , params ); }, }); } </ script > </ body > </ html >
+​ Core Functions
+​ 1. initAbhaApp
+containerId
+string
+clientId
+string
+accessToken: string;
+hipId: string;
+oid?: string;
+identifier?: string;
+identifier_type?: string;
+counter_id?: string;
+consent_id?: string;
+flow?: string;
+orgIconUrl?: string;
+linkToOrgIcon?: string;
+skipABHAEnable?: boolean;
+Bearer
+identifier
+abha-kyc
+consent
+keys with ? are optional and needs to be passed as per flow requirement.
+object
+onSuccess
+(params: TOnAbhaSuccessParams) => void
+onKYCSuccess
+(params: TOnAbhaKycSuccessParams) => void
+onConsentSuccess
+(params: TOnAbhaConsentSuccessParams) => void
+onAppointmentBookedSuccess
+(params: TOnAbhaSnSAppointmentSuccessParams) => void
+onSkipAbha
+(params: TOnSkipABHA) => void
+onAbhaClose
+() => void
+onError
+(params: TOnAbhaFailureParams) => void
+​ Callback Parameters
+​ onSuccess Callback
+onSuccess : ( params : TOnAbhaSuccessParams ) => void ;
+onSuccess : ( params : TOnAbhaSuccessParams ) => void ;
+type TOnAbhaSuccessParams = { response : TAuthVerifyV2Response ; }; type TAuthVerifyV2Response = { skip_state : number ; method : AUTH_METHOD ; data ?: { tokens : { sess : string ; refresh : string ; }; profile : TProfileRecord ; }; txn_id : string ; error ?: { code : number ; message : string ; }; }; enum AUTH_METHOD { EMAIL = 1 , MOBILE = 2 , ABHA = 7 , } type TProfileRecord = { fln : string ; fn : string ; mn ?: string ; ln ?: string ; gen ?: "M" | "F" | "O" | "U" | undefined ; // 'male' | 'female' | 'other' | 'unknown' dob ?: string ; mobile ?: string ; email ?: string ; uuid ?: string ; bloodgroup ?: "" | "A+" | "A-" | "B+" | "B-" | "O+" | "O-" | "AB+" | "AB-" ; pic ?: string ; as ?: string ; "dob-valid" ?: boolean ; "is-d" ?: boolean ; "is-d-s" ?: boolean ; "is-p" ?: boolean ; oid : string ; at : string ; type ?: 1 | 2 | 3 | 4 | 5 | 6 ; "health-ids" ?: Array < string >; abha_number ?: string ; kyc_verified ?: boolean ; };
+type TOnAbhaSuccessParams = { response : TAuthVerifyV2Response ; }; type TAuthVerifyV2Response = { skip_state : number ; method : AUTH_METHOD ; data ?: { tokens : { sess : string ; refresh : string ; }; profile : TProfileRecord ; }; txn_id : string ; error ?: { code : number ; message : string ; }; }; enum AUTH_METHOD { EMAIL = 1 , MOBILE = 2 , ABHA = 7 , } type TProfileRecord = { fln : string ; fn : string ; mn ?: string ; ln ?: string ; gen ?: "M" | "F" | "O" | "U" | undefined ; // 'male' | 'female' | 'other' | 'unknown' dob ?: string ; mobile ?: string ; email ?: string ; uuid ?: string ; bloodgroup ?: "" | "A+" | "A-" | "B+" | "B-" | "O+" | "O-" | "AB+" | "AB-" ; pic ?: string ; as ?: string ; "dob-valid" ?: boolean ; "is-d" ?: boolean ; "is-d-s" ?: boolean ; "is-p" ?: boolean ; oid : string ; at : string ; type ?: 1 | 2 | 3 | 4 | 5 | 6 ; "health-ids" ?: Array < string >; abha_number ?: string ; kyc_verified ?: boolean ; };
+response
+TAuthVerifyV2Response
+const onSuccess = ( params ) => { console . log ( "ABHA Success:" , params . response ); const abhaNumber = params . response . data ?. profile ?. abha_number ; const userName = params . response . data ?. profile ?. name ; alert ( `Welcome ${ userName } ! Your ABHA Number: ${ abhaNumber } ` ); // Optionally pass data to native bridge if available if ( window . EkaAbha ) { window . EkaAbha . onAbhaSuccess ( JSON . stringify ( params )); } };
+const onSuccess = ( params ) => { console . log ( "ABHA Success:" , params . response ); const abhaNumber = params . response . data ?. profile ?. abha_number ; const userName = params . response . data ?. profile ?. name ; alert ( `Welcome ${ userName } ! Your ABHA Number: ${ abhaNumber } ` ); // Optionally pass data to native bridge if available if ( window . EkaAbha ) { window . EkaAbha . onAbhaSuccess ( JSON . stringify ( params )); } };
+​ onKYCSuccess Callback
+onKYCSuccess : ( params : TOnAbhaKycSuccessParams ) => void ;
+onKYCSuccess : ( params : TOnAbhaKycSuccessParams ) => void ;
+type TOnAbhaKycSuccess = string ;
+type TOnAbhaKycSuccess = string ;
+TOnAbhaKycSuccess
+string
+const onKYCSuccess = ( params ) => { console . log ( "KYC verification Success:" , params ); alert ( "KYC was verified successfully!" ); // Optionally pass data to native bridge if available if ( window . EkaAbha ) { window . EkaAbha . onAbhaKYCSuccess ( params ); } };
+const onKYCSuccess = ( params ) => { console . log ( "KYC verification Success:" , params ); alert ( "KYC was verified successfully!" ); // Optionally pass data to native bridge if available if ( window . EkaAbha ) { window . EkaAbha . onAbhaKYCSuccess ( params ); } };
+​ onConsentSuccess Callback
+onConsentSuccess : ( params : TOnAbhaConsentSuccessParams ) => void ;
+onConsentSuccess : ( params : TOnAbhaConsentSuccessParams ) => void ;
+type TOnAbhaConsentSuccessParams = string ;
+type TOnAbhaConsentSuccessParams = string ;
+TOnAbhaConsentSuccessParams
+string
+const onConsentSuccess = ( params ) => { console . log ( "Consent Flow completed:" , params ); alert ( "Consent flow completed successfully!" ); // Optionally pass data to native bridge if available if ( window . EkaAbha ) { window . EkaAbha . onAbhaConsentSuccess ( params ); } };
+const onConsentSuccess = ( params ) => { console . log ( "Consent Flow completed:" , params ); alert ( "Consent flow completed successfully!" ); // Optionally pass data to native bridge if available if ( window . EkaAbha ) { window . EkaAbha . onAbhaConsentSuccess ( params ); } };
+​ onAppointmentBookedSuccess Callback
+onAppointmentBookedSuccess : ( params : TOnAbhaSnSAppointmentSuccessParams ) => void ;
+onAppointmentBookedSuccess : ( params : TOnAbhaSnSAppointmentSuccessParams ) => void ;
+type TOnAbhaSnSAppointmentSuccess = string ;
+type TOnAbhaSnSAppointmentSuccess = string ;
+onAppointmentBookedSuccess
+string
+const onAppointmentBookedSuccess = ( params ) => { console . log ( "Appointment Booked successfully!:" , params ); alert ( "Appointment Booked successfully!" ); // Optionally pass data to native bridge if available if ( window . EkaAbha ) { window . EkaAbha . onAppointmentBookedSuccess ( params ); } };
+const onAppointmentBookedSuccess = ( params ) => { console . log ( "Appointment Booked successfully!:" , params ); alert ( "Appointment Booked successfully!" ); // Optionally pass data to native bridge if available if ( window . EkaAbha ) { window . EkaAbha . onAppointmentBookedSuccess ( params ); } };
+​ onSkipAbha Callback
+onSkipAbha : ( params : TOnSkipABHA ) => void ;
+onSkipAbha : ( params : TOnSkipABHA ) => void ;
+const onSkipAbha = ( params ) => { console . log ( "ABHA SDK Skipped:" , params ); };
+const onSkipAbha = ( params ) => { console . log ( "ABHA SDK Skipped:" , params ); };
+type IdentifierType = | "mobile" | "aadhaar_number" | "abha_number" | "phr_address" ; type TOnSkipABHA = { identifier ?: string ; identifier_type ?: IdentifierType []; // No default value here };
+type IdentifierType = | "mobile" | "aadhaar_number" | "abha_number" | "phr_address" ; type TOnSkipABHA = { identifier ?: string ; identifier_type ?: IdentifierType []; // No default value here };
+identifier
+string?
+identifier_type
+IdentifierType[]?
+​ onAbhaClose Callback
+onAbhaClose : () => void ;
+onAbhaClose : () => void ;
+const onAbhaClose = () => { console . log ( "ABHA SDK Closed" ); };
+const onAbhaClose = () => { console . log ( "ABHA SDK Closed" ); };
+​ onError Callback
+onError : ( params : TOnAbhaFailureParams ) => void ;
+onError : ( params : TOnAbhaFailureParams ) => void ;
+type TOnAbhaFailureParams = { error ?: string ; response ?: TAuthVerifyV2Response ; }; type TAuthVerifyV2Response = { skip_state : number ; method : AUTH_METHOD ; data ?: { tokens : { sess : string ; refresh : string ; }; profile : TProfileRecord ; }; txn_id : string ; error ?: { code : number ; message : string ; }; }; enum AUTH_METHOD { EMAIL = 1 , MOBILE = 2 , ABHA = 7 , } type TProfileRecord = { fln : string ; fn : string ; mn ?: string ; ln ?: string ; gen ?: "M" | "F" | "O" | "U" | undefined ; // 'male' | 'female' | 'other' | 'unknown' dob ?: string ; mobile ?: string ; email ?: string ; uuid ?: string ; bloodgroup ?: "" | "A+" | "A-" | "B+" | "B-" | "O+" | "O-" | "AB+" | "AB-" ; pic ?: string ; as ?: string ; "dob-valid" ?: boolean ; "is-d" ?: boolean ; "is-d-s" ?: boolean ; "is-p" ?: boolean ; oid : string ; at : string ; type ?: 1 | 2 | 3 | 4 | 5 | 6 ; "health-ids" ?: Array < string >; abha_number ?: string ; kyc_verified ?: boolean ; };
+type TOnAbhaFailureParams = { error ?: string ; response ?: TAuthVerifyV2Response ; }; type TAuthVerifyV2Response = { skip_state : number ; method : AUTH_METHOD ; data ?: { tokens : { sess : string ; refresh : string ; }; profile : TProfileRecord ; }; txn_id : string ; error ?: { code : number ; message : string ; }; }; enum AUTH_METHOD { EMAIL = 1 , MOBILE = 2 , ABHA = 7 , } type TProfileRecord = { fln : string ; fn : string ; mn ?: string ; ln ?: string ; gen ?: "M" | "F" | "O" | "U" | undefined ; // 'male' | 'female' | 'other' | 'unknown' dob ?: string ; mobile ?: string ; email ?: string ; uuid ?: string ; bloodgroup ?: "" | "A+" | "A-" | "B+" | "B-" | "O+" | "O-" | "AB+" | "AB-" ; pic ?: string ; as ?: string ; "dob-valid" ?: boolean ; "is-d" ?: boolean ; "is-d-s" ?: boolean ; "is-p" ?: boolean ; oid : string ; at : string ; type ?: 1 | 2 | 3 | 4 | 5 | 6 ; "health-ids" ?: Array < string >; abha_number ?: string ; kyc_verified ?: boolean ; };
+string?
+response
+TAuthVerifyV2Response?
+const onError = ( params ) => { console . error ( "ABHA Error:" , params ); if ( params . response ?. error ?. code === 1001 ) { alert ( "Authentication failed. Please try again." ); } else if ( params . error === "NETWORK_ERROR" ) { alert ( "Please check your internet connection." ); } else { alert ( "Something went wrong. Please retry." ); } // Forward the error to native handler if available if ( window . EkaAbha ) { window . EkaAbha . onAbhaFailure ( JSON . stringify ( params )); } };
+const onError = ( params ) => { console . error ( "ABHA Error:" , params ); if ( params . response ?. error ?. code === 1001 ) { alert ( "Authentication failed. Please try again." ); } else if ( params . error === "NETWORK_ERROR" ) { alert ( "Please check your internet connection." ); } else { alert ( "Something went wrong. Please retry." ); } // Forward the error to native handler if available if ( window . EkaAbha ) { window . EkaAbha . onAbhaFailure ( JSON . stringify ( params )); } };
+window . EkaAbha . onAbhaFailure ( JSON . stringify ( params ));
+window . EkaAbha . onAbhaFailure ( JSON . stringify ( params ));
+​ Container Styling
+< div id = "sdk_container" style = "width: 100%; height: 600px; border: 1px solid #ddd;" ></ div >
+< div id = "sdk_container" style = "width: 100%; height: 600px; border: 1px solid #ddd;" ></ div >
+​ Troubleshooting
+​ Common Issues
+Was this page helpful?
