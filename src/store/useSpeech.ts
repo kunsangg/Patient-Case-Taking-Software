@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useStore } from './useStore';
+import { useStore, onNavigate } from './useStore';
 
 const LANG_CODES: Record<string, string> = {
   Hindi: 'hi-IN',
@@ -42,7 +42,8 @@ function speakBrowserFallback(text: string, language: string, onEnd: () => void)
   window.speechSynthesis.speak(utterance);
 }
 
-// Memory tracking references for HTML5 Audio & Blob URL cleanup
+// Global speech tracking state & in-flight async call ID counter
+let currentCallId = 0;
 let activeAudio: HTMLAudioElement | null = null;
 let activeBlobUrl: string | null = null;
 
@@ -58,16 +59,27 @@ function cleanupAudio() {
   }
 }
 
+/** Immediately halts any playing or in-flight voice narration across the application. */
+export function stopAllSpeech() {
+  currentCallId++; // Invalidate all pending async TTS fetch responses
+  cleanupAudio();
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+// Automatically subscribe stopAllSpeech to cut off voice when navigation occurs
+onNavigate(() => {
+  stopAllSpeech();
+});
+
 /** Manual speak/stop control with ElevenLabs TTS + Web Speech Fallback. */
 export function useSpeak() {
   const language = useStore((s) => s.language);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   const stop = useCallback(() => {
-    cleanupAudio();
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
+    stopAllSpeech();
     setIsSpeaking(false);
   }, []);
 
@@ -77,12 +89,14 @@ export function useSpeak() {
         if (onEnd) onEnd();
         return;
       }
-      stop();
+      stopAllSpeech();
+      const thisCallId = ++currentCallId;
       setIsSpeaking(true);
 
       const targetLanguage = overrideLanguage || language;
 
       const handleFinished = () => {
+        if (thisCallId !== currentCallId) return;
         setIsSpeaking(false);
         cleanupAudio();
         if (onEnd) onEnd();
@@ -95,10 +109,15 @@ export function useSpeak() {
           body: JSON.stringify({ text, language: targetLanguage })
         });
 
+        // Abort if a newer request or screen navigation occurred while waiting
+        if (thisCallId !== currentCallId) return;
+
         const contentType = res.headers.get('content-type') || '';
 
         if (res.ok && contentType.includes('audio/mpeg')) {
           const blob = await res.blob();
+          if (thisCallId !== currentCallId) return;
+
           const audioUrl = URL.createObjectURL(blob);
           activeBlobUrl = audioUrl;
 
@@ -110,6 +129,7 @@ export function useSpeak() {
           };
 
           audio.onerror = () => {
+            if (thisCallId !== currentCallId) return;
             speakBrowserFallback(text, targetLanguage, handleFinished);
           };
 
@@ -117,13 +137,17 @@ export function useSpeak() {
           return;
         }
 
-        speakBrowserFallback(text, targetLanguage, handleFinished);
+        if (thisCallId === currentCallId) {
+          speakBrowserFallback(text, targetLanguage, handleFinished);
+        }
       } catch (err) {
-        console.warn("ElevenLabs TTS failed, using fallback:", err);
-        speakBrowserFallback(text, targetLanguage, handleFinished);
+        if (thisCallId === currentCallId) {
+          console.warn("ElevenLabs TTS failed, using fallback:", err);
+          speakBrowserFallback(text, targetLanguage, handleFinished);
+        }
       }
     },
-    [language, stop]
+    [language]
   );
 
   useEffect(() => {
@@ -141,8 +165,16 @@ export function useSpeak() {
  */
 export function useAutoSpeak(text: string, sourceText: string, onEnd?: () => void) {
   const language = useStore((s) => s.language);
+  const currentScreen = useStore((s) => s.currentScreen);
   const { speak } = useSpeak();
   const lastSpoken = useRef<string>('');
+
+  // Cut off audio whenever screen changes or component unmounts
+  useEffect(() => {
+    return () => {
+      stopAllSpeech();
+    };
+  }, [currentScreen]);
 
   useEffect(() => {
     const ready = language === 'English' || text !== sourceText;

@@ -44,6 +44,26 @@ function createInitialCase(): PatientCase {
   };
 }
 
+type NavigationListener = () => void;
+const navListeners = new Set<NavigationListener>();
+
+export function onNavigate(fn: NavigationListener) {
+  navListeners.add(fn);
+  return () => {
+    navListeners.delete(fn);
+  };
+}
+
+function notifyNavigate() {
+  navListeners.forEach((fn) => {
+    try {
+      fn();
+    } catch (e) {
+      console.error("Navigation listener error:", e);
+    }
+  });
+}
+
 export const useStore = create<AppState & { screenHistory: number[] }>((set) => ({
   currentScreen: 1,
   screenHistory: [],
@@ -52,25 +72,34 @@ export const useStore = create<AppState & { screenHistory: number[] }>((set) => 
   abhaProfile: null,
   patientCase: createInitialCase(),
   
-  setScreen: (screen) => set((state) => ({ 
-    screenHistory: [...state.screenHistory, state.currentScreen],
-    currentScreen: screen 
-  })),
+  setScreen: (screen) => {
+    notifyNavigate();
+    set((state) => ({ 
+      screenHistory: [...state.screenHistory, state.currentScreen],
+      currentScreen: screen 
+    }));
+  },
   
-  nextScreen: () => set((state) => ({ 
-    screenHistory: [...state.screenHistory, state.currentScreen],
-    currentScreen: Math.min(state.currentScreen + 1, 9) 
-  })),
+  nextScreen: () => {
+    notifyNavigate();
+    set((state) => ({ 
+      screenHistory: [...state.screenHistory, state.currentScreen],
+      currentScreen: Math.min(state.currentScreen + 1, 9) 
+    }));
+  },
   
-  prevScreen: () => set((state) => {
-    const history = [...state.screenHistory];
-    const prev = history.pop();
-    if (prev === undefined) return { currentScreen: 1 };
-    return {
-      screenHistory: history,
-      currentScreen: prev
-    };
-  }),
+  prevScreen: () => {
+    notifyNavigate();
+    set((state) => {
+      const history = [...state.screenHistory];
+      const prev = history.pop();
+      if (prev === undefined) return { currentScreen: 1 };
+      return {
+        screenHistory: history,
+        currentScreen: prev
+      };
+    });
+  },
   
   setLanguage: (lang) => set({ language: lang }),
   setIsNewPatient: (isNew) => set({ isNewPatient: isNew }),
@@ -81,12 +110,15 @@ export const useStore = create<AppState & { screenHistory: number[] }>((set) => 
   })),
   
   // Enforces complete stateless isolation & data purging between patient sessions
-  resetSession: () => set({
-    currentScreen: 1,
-    screenHistory: [],
-    language: 'English',
-    isNewPatient: null,
-    abhaProfile: null,
-    patientCase: createInitialCase(),
-  }),
+  resetSession: () => {
+    notifyNavigate();
+    set({
+      currentScreen: 1,
+      screenHistory: [],
+      language: 'English',
+      isNewPatient: null,
+      abhaProfile: null,
+      patientCase: createInitialCase(),
+    });
+  },
 }));

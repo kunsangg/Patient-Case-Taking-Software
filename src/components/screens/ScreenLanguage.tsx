@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useStore } from "@/store/useStore";
-import { useSpeak } from "@/store/useSpeech";
+import { useSpeak, stopAllSpeech } from "@/store/useSpeech";
 
 const LANGUAGES = [
   { script: "हिन्दी", english: "Hindi" },
@@ -24,10 +24,14 @@ export function ScreenLanguage() {
     const timer = setTimeout(() => {
       speak(HINDI_NARRATION, undefined, "Hindi");
     }, 400);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      stopAllSpeech();
+    };
   }, [speak]);
 
   const handleSelect = (lang: string) => {
+    stopAllSpeech();
     setLanguage(lang);
     setScreen(2); // Go to Welcome Screen
   };
