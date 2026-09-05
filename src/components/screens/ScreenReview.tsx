@@ -6,12 +6,14 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const HEADLINE = "Your case is ready";
+const REVIEW_VOICE_PROMPT = "Your intake case report is ready. Please review your summary below, make any edits if needed, and tap Submit to Doctor to join the waiting room queue.";
 
 export function ScreenReview() {
   const { patientCase, updateCase, nextScreen } = useStore();
   const t = useT();
   const { speak } = useSpeak();
   const headline = t(HEADLINE);
+  const reviewVoiceText = t(REVIEW_VOICE_PROMPT);
 
   const [isAnalyzing, setIsAnalyzing] = useState(!patientCase.aiAnalysis?.clinicalSummary);
   const [isEditing, setIsEditing] = useState(false);
@@ -24,7 +26,7 @@ export function ScreenReview() {
   const [newVal, setNewVal] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
 
-  useAutoSpeak(isAnalyzing ? "" : headline, HEADLINE);
+  useAutoSpeak(isAnalyzing ? "" : reviewVoiceText, REVIEW_VOICE_PROMPT);
 
   useEffect(() => {
     if (!patientCase.aiAnalysis?.clinicalSummary) {
