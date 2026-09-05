@@ -198,33 +198,33 @@ export function ScreenBodyMap() {
   };
 
   return (
-    <div className="flex h-full flex-col items-center justify-center px-10 pb-12 w-full">
-      <div className="max-w-[880px] w-full bg-white/95 backdrop-blur-3xl p-10 rounded-card shadow-card border border-white/60 flex flex-col items-center min-h-[700px]">
+    <div className="flex h-full flex-col items-center justify-center px-4 md:px-8 pb-6 w-full">
+      <div className="max-w-3xl w-full bg-white/95 backdrop-blur-3xl p-6 md:p-8 rounded-card shadow-card border border-white/60 flex flex-col items-center max-h-[88vh] overflow-y-auto scrollbar-hide">
 
         {/* Top Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-display font-serif text-[#000B33] mb-2">
+        <div className="text-center mb-4 shrink-0">
+          <h1 className="text-2xl md:text-3xl font-serif text-[#000B33] mb-1">
             {headline}
           </h1>
-          <p className="text-body-lg text-[#000B33]/55 max-w-xl mx-auto mb-2">
+          <p className="text-sm text-[#000B33]/60 max-w-md mx-auto mb-1">
             {t("Tap directly on any body part to pinpoint your exact pain location.")}
           </p>
           <button
             onClick={() => speak(headline)}
-            className="inline-flex items-center gap-2 text-label font-bold text-[#1C718A] uppercase hover:opacity-70 transition-opacity"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1C718A] uppercase hover:opacity-70 transition-opacity"
           >
-            <Volume2 className="h-4 w-4" />
+            <Volume2 className="h-3.5 w-3.5" />
             {t("Listen again")}
           </button>
         </div>
 
-        {/* Interactive Anatomy Card Container */}
-        <div className="w-full max-w-[760px] bg-gradient-to-b from-slate-50/80 to-white rounded-card-sm border border-slate-200/90 shadow-sm p-6 flex flex-col items-center relative mb-6">
+        {/* Compact Interactive Anatomy Card Container */}
+        <div className="w-full max-w-[620px] bg-gradient-to-b from-slate-50/90 to-white rounded-2xl border border-slate-200/90 shadow-sm p-4 flex flex-col items-center relative mb-4 shrink-0">
 
           {/* View Indicator & Flip Controls */}
-          <div className="flex items-center justify-between w-full mb-4 px-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#000B33]/60 uppercase tracking-wider">
-              <MapPin size={16} className="text-[#1C718A]" />
+          <div className="flex items-center justify-between w-full mb-3 px-1">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#000B33]/60 uppercase tracking-wider">
+              <MapPin size={14} className="text-[#1C718A]" />
               <span>{t("Anatomy View:")} <strong className="text-[#000B33] capitalize">{t(view)}</strong></span>
             </div>
 
@@ -233,18 +233,18 @@ export function ScreenBodyMap() {
                 setView(view === "front" ? "back" : "front");
                 setSelectedRegion(null);
               }}
-              className="flex items-center gap-2 px-5 py-2 rounded-full bg-white border border-gray-200 text-xs font-bold text-[#000B33] shadow-sm hover:border-[#1C718A] hover:text-[#1C718A] transition-all"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-bold text-[#000B33] shadow-sm hover:border-[#1C718A] hover:text-[#1C718A] transition-all"
             >
-              <RotateCw size={14} />
+              <RotateCw size={12} />
               <span>{t("Flip to")} {view === "front" ? t("Back View") : t("Front View")}</span>
             </button>
           </div>
 
-          {/* Perfectly Aligned Precision Anatomy SVG */}
-          <div className="relative w-[380px] h-[480px] flex items-center justify-center select-none bg-white/60 rounded-2xl border border-slate-100 p-2 shadow-inner">
+          {/* Compact Fluid Precision Anatomy SVG Container */}
+          <div className="relative w-full max-w-[240px] aspect-[4/5] flex items-center justify-center select-none bg-white/80 rounded-xl border border-slate-100 p-1.5 shadow-inner mb-3">
             <svg viewBox="0 0 400 500" className="w-full h-full">
               
-              {/* Render Anatomical Regions with Exact Paths */}
+              {/* Render Anatomical Regions with Scaled Precision */}
               {activeRegions.map((region) => {
                 const isSelected = selectedRegion?.id === region.id;
 
@@ -303,21 +303,21 @@ export function ScreenBodyMap() {
             </svg>
           </div>
 
-          {/* Quick Select Buttons */}
-          <div className="w-full pt-4 border-t border-slate-200/80 flex flex-col items-center">
-            <span className="text-xs font-bold text-[#000B33]/40 uppercase mb-3 tracking-wider">
+          {/* Compact Quick Select Pills */}
+          <div className="w-full pt-3 border-t border-slate-200/80 flex flex-col items-center">
+            <span className="text-[11px] font-bold text-[#000B33]/40 uppercase mb-2 tracking-wider">
               {t("Or tap a region name:")}
             </span>
-            <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
+            <div className="flex flex-wrap justify-center gap-1.5 max-w-lg">
               {activeRegions.map((region) => {
                 const isSelected = selectedRegion?.id === region.id;
                 return (
                   <button
                     key={region.id}
                     onClick={() => handleSelectRegion(region)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                    className={`px-3 py-1 rounded-full text-[11px] font-bold transition-all ${
                       isSelected
-                        ? "bg-[#1C718A] text-white shadow-md scale-105"
+                        ? "bg-[#1C718A] text-white shadow-sm scale-105"
                         : "bg-white text-[#000B33]/80 border border-gray-200 hover:border-[#1C718A] hover:text-[#1C718A]"
                     }`}
                   >
@@ -333,16 +333,16 @@ export function ScreenBodyMap() {
         <AnimatePresence>
           {selectedRegion && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="w-full max-w-[760px] bg-emerald-50/90 border border-emerald-200 rounded-card-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 shadow-sm"
+              exit={{ opacity: 0, y: 8 }}
+              className="w-full max-w-[620px] bg-emerald-50/90 border border-emerald-200 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 shadow-sm shrink-0"
             >
-              <div className="flex items-center gap-3 text-left">
-                <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0" />
+              <div className="flex items-center gap-2.5 text-left">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
                 <div>
-                  <span className="text-xs font-bold text-emerald-800/60 uppercase tracking-wider block">{t("Pain Location Pinpointed")}</span>
-                  <span className="text-base font-bold text-emerald-950">{t(selectedRegion.name)}</span>
+                  <span className="text-[10px] font-bold text-emerald-800/60 uppercase tracking-wider block">{t("Pain Location Pinpointed")}</span>
+                  <span className="text-sm font-bold text-emerald-950">{t(selectedRegion.name)}</span>
                 </div>
               </div>
 
@@ -352,7 +352,7 @@ export function ScreenBodyMap() {
                   placeholder={t("Specific detail (e.g. Sharp pain on left side)...")}
                   value={customDetail}
                   onChange={(e) => handleCustomDetailChange(e.target.value)}
-                  className="px-4 py-2 bg-white border border-emerald-200 rounded-full text-xs font-medium text-[#000B33] focus:outline-none focus:ring-2 focus:ring-emerald-400 w-full sm:w-[280px]"
+                  className="px-3.5 py-1.5 bg-white border border-emerald-200 rounded-full text-xs font-medium text-[#000B33] focus:outline-none focus:ring-2 focus:ring-emerald-400 w-full sm:w-[240px]"
                 />
               </div>
             </motion.div>
@@ -360,18 +360,18 @@ export function ScreenBodyMap() {
         </AnimatePresence>
 
         {/* Bottom Navigation Actions */}
-        <div className="flex w-full justify-between items-center mt-auto max-w-md mx-auto">
+        <div className="flex w-full justify-between items-center mt-auto max-w-xs mx-auto shrink-0">
           {selectedRegion ? (
             <button
               onClick={nextScreen}
-              className="w-full py-4 rounded-full bg-[#000B33] text-white text-body font-semibold hover:bg-black active:scale-[0.98] transition-all duration-300 ease-premium shadow-md"
+              className="w-full py-3.5 rounded-full bg-[#000B33] text-white text-sm font-semibold hover:bg-black active:scale-[0.98] transition-all duration-300 ease-premium shadow-md"
             >
               {t("Save & Continue")}
             </button>
           ) : (
             <button
               onClick={nextScreen}
-              className="w-full py-4 text-[#000B33]/45 text-body font-medium hover:text-[#000B33] transition-colors duration-300 ease-premium"
+              className="w-full py-3 text-[#000B33]/45 text-sm font-medium hover:text-[#000B33] transition-colors duration-300 ease-premium"
             >
               {t("Skip this step")}
             </button>
