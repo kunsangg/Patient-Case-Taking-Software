@@ -2,9 +2,43 @@ import { useState } from "react";
 import { useStore } from "@/store/useStore";
 import { useT } from "@/store/useTranslation";
 import { useAutoSpeak, useSpeak } from "@/store/useSpeech";
-import { Volume2 } from "lucide-react";
+import { Volume2, CheckCircle2, RotateCw, MapPin } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const HEADLINE = "Where does it hurt?";
+
+interface BodyRegion {
+  id: string;
+  name: string;
+  view: "front" | "back";
+  cx: number;
+  cy: number;
+  r: number;
+  labelPosition: { x: number; y: number };
+}
+
+const BODY_REGIONS: BodyRegion[] = [
+  // Front View Regions
+  { id: "head", name: "Head & Face", view: "front", cx: 200, cy: 70, r: 32, labelPosition: { x: 310, y: 70 } },
+  { id: "neck", name: "Neck & Throat", view: "front", cx: 200, cy: 125, r: 18, labelPosition: { x: 310, y: 125 } },
+  { id: "chest", name: "Chest & Ribs", view: "front", cx: 200, cy: 175, r: 35, labelPosition: { x: 310, y: 175 } },
+  { id: "abdomen", name: "Stomach & Abdomen", view: "front", cx: 200, cy: 245, r: 34, labelPosition: { x: 310, y: 245 } },
+  { id: "pelvis", name: "Hips & Pelvis", view: "front", cx: 200, cy: 305, r: 28, labelPosition: { x: 310, y: 305 } },
+  { id: "left_arm", name: "Right Arm & Hand", view: "front", cx: 135, cy: 220, r: 24, labelPosition: { x: 70, y: 220 } },
+  { id: "right_arm", name: "Left Arm & Hand", view: "front", cx: 265, cy: 220, r: 24, labelPosition: { x: 320, y: 220 } },
+  { id: "left_leg", name: "Right Leg & Knee", view: "front", cx: 165, cy: 400, r: 32, labelPosition: { x: 70, y: 400 } },
+  { id: "right_leg", name: "Left Leg & Knee", view: "front", cx: 235, cy: 400, r: 32, labelPosition: { x: 320, y: 400 } },
+
+  // Back View Regions
+  { id: "head_back", name: "Back of Head", view: "back", cx: 200, cy: 70, r: 32, labelPosition: { x: 310, y: 70 } },
+  { id: "upper_back", name: "Upper Back & Shoulders", view: "back", cx: 200, cy: 170, r: 38, labelPosition: { x: 310, y: 170 } },
+  { id: "lower_back", name: "Lower Back & Spine", view: "back", cx: 200, cy: 250, r: 36, labelPosition: { x: 310, y: 250 } },
+  { id: "glutes", name: "Hips & Lower Back", view: "back", cx: 200, cy: 315, r: 30, labelPosition: { x: 310, y: 315 } },
+  { id: "left_arm_back", name: "Left Arm (Back)", view: "back", cx: 135, cy: 220, r: 24, labelPosition: { x: 70, y: 220 } },
+  { id: "right_arm_back", name: "Right Arm (Back)", view: "back", cx: 265, cy: 220, r: 24, labelPosition: { x: 320, y: 220 } },
+  { id: "left_leg_back", name: "Left Leg (Back)", view: "back", cx: 165, cy: 400, r: 32, labelPosition: { x: 70, y: 400 } },
+  { id: "right_leg_back", name: "Right Leg (Back)", view: "back", cx: 235, cy: 400, r: 32, labelPosition: { x: 320, y: 400 } },
+];
 
 export function ScreenBodyMap() {
   const { nextScreen, updateCase } = useStore();
@@ -12,26 +46,42 @@ export function ScreenBodyMap() {
   const { speak } = useSpeak();
   const headline = t(HEADLINE);
   useAutoSpeak(headline, HEADLINE);
-  const [manualInput, setManualInput] = useState("");
-  const [hasSaved, setHasSaved] = useState(false);
 
-  const handleManualSubmit = () => {
-    if (manualInput.trim()) {
-      updateCase({ history: { location: manualInput.trim() } });
-      setHasSaved(true);
+  const [view, setView] = useState<"front" | "back">("front");
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [customDetail, setCustomDetail] = useState("");
+
+  const activeRegions = BODY_REGIONS.filter((r) => r.view === view);
+
+  const handleSelectRegion = (regionName: string) => {
+    setSelectedRegion(regionName);
+    const locationText = customDetail.trim()
+      ? `${regionName} (${customDetail.trim()})`
+      : regionName;
+    updateCase({ history: { location: locationText } });
+  };
+
+  const handleCustomDetailChange = (text: string) => {
+    setCustomDetail(text);
+    if (selectedRegion) {
+      const locationText = text.trim()
+        ? `${selectedRegion} (${text.trim()})`
+        : selectedRegion;
+      updateCase({ history: { location: locationText } });
     }
   };
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-10 pb-12 w-full">
-      <div className="max-w-4xl w-full bg-white/95 backdrop-blur-3xl p-10 rounded-card shadow-card border border-white/60 flex flex-col items-center min-h-[750px]">
+      <div className="max-w-[880px] w-full bg-white/95 backdrop-blur-3xl p-10 rounded-card shadow-card border border-white/60 flex flex-col items-center min-h-[700px]">
 
-        <div className="text-center mb-8">
-          <h1 className="text-display font-serif text-[#000B33] mb-3">
+        {/* Top Title Bar */}
+        <div className="text-center mb-6">
+          <h1 className="text-display font-serif text-[#000B33] mb-2">
             {headline}
           </h1>
-          <p className="text-body-lg text-[#000B33]/55 max-w-xl mx-auto mb-3">
-            {t("Explore the anatomy map to pinpoint your exact pain location, then type it below to save.")}
+          <p className="text-body-lg text-[#000B33]/55 max-w-xl mx-auto mb-2">
+            {t("Tap on the body map below to pinpoint your exact pain location.")}
           </p>
           <button
             onClick={() => speak(headline)}
@@ -42,66 +92,159 @@ export function ScreenBodyMap() {
           </button>
         </div>
 
-        {/* Pure Innerbody Embed */}
-        <div className="w-full max-w-[800px] h-[550px] bg-white rounded-card-sm shadow-inner border-[6px] border-white overflow-hidden relative flex flex-col items-center justify-center mb-8">
+        {/* Body Map Card Container */}
+        <div className="w-full max-w-[760px] bg-gradient-to-b from-gray-50/80 to-white rounded-card-sm border border-slate-200/90 shadow-sm p-6 flex flex-col items-center relative mb-6">
 
-          {/* CSS Cropping trick to isolate the canvas and hide the header/sidebar */}
-          <div className="absolute inset-0 z-0 overflow-hidden bg-white">
-            <iframe
-              src="https://www.innerbody.com/image/musfov.html"
-              className="absolute border-0"
-              style={{
-                width: "180%",
-                height: "160%",
-                top: "-220px",
-                left: "-380px"
-              }}
-              title="3D Anatomy Viewer"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-            />
+          {/* View Toggle Bar (Front / Back) */}
+          <div className="flex items-center justify-between w-full mb-4 px-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#000B33]/60 uppercase tracking-wider">
+              <MapPin size={16} className="text-[#1C718A]" />
+              <span>{t("Anatomy View:")} <strong className="text-[#000B33] capitalize">{t(view)}</strong></span>
+            </div>
+
+            <button
+              onClick={() => setView(view === "front" ? "back" : "front")}
+              className="flex items-center gap-2 px-5 py-2 rounded-full bg-white border border-gray-200 text-xs font-bold text-[#000B33] shadow-sm hover:border-[#1C718A] hover:text-[#1C718A] transition-all"
+            >
+              <RotateCw size={14} />
+              <span>{t("Flip to")} {view === "front" ? t("Back View") : t("Front View")}</span>
+            </button>
           </div>
 
-          {/* Edge mask to hide any scrollbars from iframe */}
-          <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_20px_rgba(255,255,255,1)] z-10" />
+          {/* Clean 2D Vector Human Silhouette & Interactive Hotspots */}
+          <div className="relative w-[400px] h-[480px] flex items-center justify-center select-none">
+            <svg viewBox="0 0 400 480" className="w-full h-full drop-shadow-sm">
+              {/* Clean Human Body Silhouette */}
+              <g fill="#EBF2F5" stroke="#B0C8D0" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round">
+                {/* Head */}
+                <ellipse cx="200" cy="70" rx="34" ry="40" />
+                
+                {/* Neck */}
+                <rect x="188" y="108" width="24" height="26" rx="6" />
 
-          {/* Overlay Input for Saving */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-white/95 backdrop-blur-md p-4 rounded-card-sm shadow-2xl border border-white/60 flex flex-col gap-3 z-20">
-            {hasSaved ? (
-              <div className="flex flex-col items-center justify-center py-2">
-                <span className="text-[17px] font-semibold text-emerald-600 mb-1">{t("Location Saved!")}</span>
-                <span className="text-[15px] font-medium text-[#000B33]/55 capitalize">{manualInput}</span>
-              </div>
-            ) : (
-              <>
-                <span className="text-[14px] font-semibold text-[#000B33] text-center">{t("Found the exact spot? Type it here to save it:")}</span>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={manualInput}
-                    onChange={(e) => setManualInput(e.target.value)}
-                    placeholder={t("e.g. Lower Back, Biceps...")}
-                    className="flex-1 px-4 py-3 bg-black/5 border border-black/10 rounded-full focus:outline-none focus:ring-2 focus:ring-[#1C718A]/25 transition-all duration-300 ease-premium"
-                  />
+                {/* Torso / Shoulders */}
+                <path d="M 140 134 C 160 130, 240 130, 260 134 C 275 140, 275 170, 268 220 C 262 260, 255 310, 242 340 L 158 340 C 145 310, 138 260, 132 220 C 125 170, 125 140, 140 134 Z" />
+
+                {/* Left Arm */}
+                <path d="M 132 142 C 122 150, 115 190, 110 240 C 105 270, 102 300, 100 315 C 98 325, 90 325, 92 315 C 96 280, 108 210, 120 160 C 125 145, 128 140, 132 142 Z" />
+
+                {/* Right Arm */}
+                <path d="M 268 142 C 278 150, 285 190, 290 240 C 295 270, 298 300, 300 315 C 302 325, 310 325, 308 315 C 304 280, 292 210, 280 160 C 275 145, 272 140, 268 142 Z" />
+
+                {/* Left Leg */}
+                <path d="M 158 335 C 158 350, 155 410, 152 460 C 150 470, 166 470, 172 460 C 178 410, 185 360, 188 335 Z" />
+
+                {/* Right Leg */}
+                <path d="M 242 335 C 242 350, 245 410, 248 460 C 250 470, 234 470, 228 460 C 222 410, 215 360, 212 335 Z" />
+              </g>
+
+              {/* Interactive Hotspot Targets */}
+              {activeRegions.map((region) => {
+                const isSelected = selectedRegion === region.name;
+
+                return (
+                  <g key={region.id} className="cursor-pointer group" onClick={() => handleSelectRegion(region.name)}>
+                    {/* Glowing outer pulse when selected */}
+                    {isSelected && (
+                      <circle
+                        cx={region.cx}
+                        cy={region.cy}
+                        r={region.r + 8}
+                        className="fill-[#1C718A]/20 stroke-[#1C718A]/60 animate-ping"
+                        strokeWidth="2"
+                      />
+                    )}
+
+                    {/* Hotspot Circle */}
+                    <circle
+                      cx={region.cx}
+                      cy={region.cy}
+                      r={region.r}
+                      className={`transition-all duration-300 ${
+                        isSelected
+                          ? "fill-[#1C718A] stroke-white shadow-lg"
+                          : "fill-white/80 stroke-[#1C718A]/40 hover:fill-[#1C718A]/30 hover:stroke-[#1C718A]"
+                      }`}
+                      strokeWidth={isSelected ? "3" : "2"}
+                    />
+
+                    {/* Inner Pin Dot */}
+                    <circle
+                      cx={region.cx}
+                      cy={region.cy}
+                      r={isSelected ? 6 : 4}
+                      className={isSelected ? "fill-white" : "fill-[#1C718A] group-hover:scale-125 transition-transform"}
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+
+          {/* Quick Select Pill Buttons for Easy Touch */}
+          <div className="w-full pt-4 border-t border-slate-200/80 flex flex-col items-center">
+            <span className="text-xs font-bold text-[#000B33]/40 uppercase mb-3 tracking-wider">
+              {t("Or tap a region below:")}
+            </span>
+            <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
+              {activeRegions.map((region) => {
+                const isSelected = selectedRegion === region.name;
+                return (
                   <button
-                    onClick={handleManualSubmit}
-                    disabled={!manualInput.trim()}
-                    className="px-6 py-3 bg-[#000B33] text-white rounded-full font-semibold hover:bg-black transition-all duration-300 ease-premium disabled:opacity-40"
+                    key={region.id}
+                    onClick={() => handleSelectRegion(region.name)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                      isSelected
+                        ? "bg-[#1C718A] text-white shadow-md scale-105"
+                        : "bg-white text-[#000B33]/80 border border-gray-200 hover:border-[#1C718A] hover:text-[#1C718A]"
+                    }`}
                   >
-                    {t("Save")}
+                    {t(region.name)}
                   </button>
-                </div>
-              </>
-            )}
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        <div className="flex w-full justify-between items-center mt-auto max-w-xl mx-auto h-16">
-          {hasSaved ? (
+        {/* Selected Region Confirmation & Optional Details */}
+        <AnimatePresence>
+          {selectedRegion && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="w-full max-w-[760px] bg-emerald-50/80 border border-emerald-200 rounded-card-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6"
+            >
+              <div className="flex items-center gap-3 text-left">
+                <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0" />
+                <div>
+                  <span className="text-xs font-bold text-emerald-800/60 uppercase tracking-wider block">{t("Selected Location")}</span>
+                  <span className="text-base font-bold text-emerald-950">{t(selectedRegion)}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <input
+                  type="text"
+                  placeholder={t("Specific detail (e.g. Left side, Upper part)...")}
+                  value={customDetail}
+                  onChange={(e) => handleCustomDetailChange(e.target.value)}
+                  className="px-4 py-2 bg-white border border-emerald-200 rounded-full text-xs font-medium text-[#000B33] focus:outline-none focus:ring-2 focus:ring-emerald-400 w-full sm:w-[260px]"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Bottom Actions */}
+        <div className="flex w-full justify-between items-center mt-auto max-w-md mx-auto">
+          {selectedRegion ? (
             <button
               onClick={nextScreen}
-              className="w-full py-5 rounded-full bg-[#000B33] text-white text-body font-semibold hover:bg-black active:scale-[0.98] transition-all duration-300 ease-premium"
+              className="w-full py-4 rounded-full bg-[#000B33] text-white text-body font-semibold hover:bg-black active:scale-[0.98] transition-all duration-300 ease-premium shadow-md"
             >
-              {t("Continue")}
+              {t("Save & Continue")}
             </button>
           ) : (
             <button
@@ -112,6 +255,7 @@ export function ScreenBodyMap() {
             </button>
           )}
         </div>
+
       </div>
     </div>
   );
