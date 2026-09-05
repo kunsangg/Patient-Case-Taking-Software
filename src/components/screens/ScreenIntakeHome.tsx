@@ -48,6 +48,8 @@ export function ScreenIntakeHome() {
     }
   };
 
+  const transcriptRef = useRef<string>("");
+
   const startListening = () => {
     setVoiceError(null);
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -70,6 +72,7 @@ export function ScreenIntakeHome() {
       recognition.onstart = () => {
         setIsListening(true);
         setTranscript("");
+        transcriptRef.current = "";
       };
 
       recognition.onresult = (event: any) => {
@@ -78,6 +81,7 @@ export function ScreenIntakeHome() {
           fullTranscript += event.results[i][0].transcript;
         }
         setTranscript(fullTranscript);
+        transcriptRef.current = fullTranscript;
       };
 
       recognition.onend = () => {
@@ -101,9 +105,14 @@ export function ScreenIntakeHome() {
       recognitionRef.current.stop();
     }
     setIsListening(false);
-    if (transcript.trim()) {
-      handleSelectComplaint(transcript.trim());
-    }
+    
+    // Immediate auto-submit on second mic tap
+    setTimeout(() => {
+      const finalText = transcriptRef.current.trim() || transcript.trim();
+      if (finalText) {
+        handleSelectComplaint(finalText);
+      }
+    }, 100);
   };
 
   const stopListening = () => {

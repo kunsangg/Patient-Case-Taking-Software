@@ -16,7 +16,7 @@ export function VoiceMicButton({
   onStart,
   onStopAndSubmit,
   onCancel,
-  submitLabel = "Done / Submit",
+  submitLabel = "Tap when done",
   idleLabel = "Tap to speak",
 }: VoiceMicButtonProps) {
   const t = useT();

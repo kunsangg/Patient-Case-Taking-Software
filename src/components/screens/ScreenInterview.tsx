@@ -129,6 +129,8 @@ export function ScreenInterview() {
     }
   };
 
+  const transcriptRef = useRef<string>("");
+
   const startListening = () => {
     setVoiceError(null);
     const SpeechRecognition =
@@ -152,6 +154,7 @@ export function ScreenInterview() {
       recognition.onstart = () => {
         setIsListening(true);
         setTranscript("");
+        transcriptRef.current = "";
       };
 
       recognition.onresult = (event: any) => {
@@ -160,6 +163,7 @@ export function ScreenInterview() {
           fullTranscript += event.results[i][0].transcript;
         }
         setTranscript(fullTranscript);
+        transcriptRef.current = fullTranscript;
       };
 
       recognition.onend = () => {
@@ -183,9 +187,14 @@ export function ScreenInterview() {
       recognitionRef.current.stop();
     }
     setIsListening(false);
-    if (transcript.trim()) {
-      handleAnswer(transcript.trim());
-    }
+    
+    // Immediate auto-submit on second mic tap
+    setTimeout(() => {
+      const finalText = transcriptRef.current.trim() || transcript.trim();
+      if (finalText) {
+        handleAnswer(finalText);
+      }
+    }, 100);
   };
 
   const stopListening = () => {
