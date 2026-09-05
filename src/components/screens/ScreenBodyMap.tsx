@@ -7,37 +7,163 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const HEADLINE = "Where does it hurt?";
 
-interface BodyRegion {
+interface AnatomyRegion {
   id: string;
   name: string;
   view: "front" | "back";
   cx: number;
   cy: number;
-  r: number;
-  labelPosition: { x: number; y: number };
+  path: string;
 }
 
-const BODY_REGIONS: BodyRegion[] = [
-  // Front View Regions
-  { id: "head", name: "Head & Face", view: "front", cx: 200, cy: 70, r: 32, labelPosition: { x: 310, y: 70 } },
-  { id: "neck", name: "Neck & Throat", view: "front", cx: 200, cy: 125, r: 18, labelPosition: { x: 310, y: 125 } },
-  { id: "chest", name: "Chest & Ribs", view: "front", cx: 200, cy: 175, r: 35, labelPosition: { x: 310, y: 175 } },
-  { id: "abdomen", name: "Stomach & Abdomen", view: "front", cx: 200, cy: 245, r: 34, labelPosition: { x: 310, y: 245 } },
-  { id: "pelvis", name: "Hips & Pelvis", view: "front", cx: 200, cy: 305, r: 28, labelPosition: { x: 310, y: 305 } },
-  { id: "left_arm", name: "Right Arm & Hand", view: "front", cx: 135, cy: 220, r: 24, labelPosition: { x: 70, y: 220 } },
-  { id: "right_arm", name: "Left Arm & Hand", view: "front", cx: 265, cy: 220, r: 24, labelPosition: { x: 320, y: 220 } },
-  { id: "left_leg", name: "Right Leg & Knee", view: "front", cx: 165, cy: 400, r: 32, labelPosition: { x: 70, y: 400 } },
-  { id: "right_leg", name: "Left Leg & Knee", view: "front", cx: 235, cy: 400, r: 32, labelPosition: { x: 320, y: 400 } },
+const REGIONS: AnatomyRegion[] = [
+  // FRONT VIEW REGIONS
+  {
+    id: "head",
+    name: "Head & Face",
+    view: "front",
+    cx: 200,
+    cy: 65,
+    path: "M 200 23 C 220 23 236 41 236 65 C 236 89 220 107 200 107 C 180 107 164 89 164 65 C 164 41 180 23 200 23 Z",
+  },
+  {
+    id: "neck",
+    name: "Neck & Throat",
+    view: "front",
+    cx: 200,
+    cy: 120,
+    path: "M 186 107 L 214 107 L 214 133 L 186 133 Z",
+  },
+  {
+    id: "chest",
+    name: "Chest & Ribs",
+    view: "front",
+    cx: 200,
+    cy: 166,
+    path: "M 148 133 C 165 130 235 130 252 133 L 256 200 L 144 200 Z",
+  },
+  {
+    id: "abdomen",
+    name: "Stomach & Abdomen",
+    view: "front",
+    cx: 200,
+    cy: 238,
+    path: "M 144 202 L 256 202 L 248 275 L 152 275 Z",
+  },
+  {
+    id: "pelvis",
+    name: "Hips & Pelvis",
+    view: "front",
+    cx: 200,
+    cy: 303,
+    path: "M 152 277 L 248 277 L 240 330 L 160 330 Z",
+  },
+  {
+    id: "left_arm",
+    name: "Right Arm & Hand",
+    view: "front",
+    cx: 115,
+    cy: 220,
+    path: "M 145 136 C 132 145 122 185 114 235 L 100 310 C 98 320 90 320 92 310 L 108 230 C 116 180 128 142 145 136 Z",
+  },
+  {
+    id: "right_arm",
+    name: "Left Arm & Hand",
+    view: "front",
+    cx: 285,
+    cy: 220,
+    path: "M 255 136 C 268 145 278 185 286 235 L 300 310 C 302 320 310 320 308 310 L 292 230 C 284 180 272 142 255 136 Z",
+  },
+  {
+    id: "left_leg",
+    name: "Right Leg & Knee",
+    view: "front",
+    cx: 175,
+    cy: 400,
+    path: "M 160 332 L 195 332 L 188 470 C 185 478 165 478 162 470 Z",
+  },
+  {
+    id: "right_leg",
+    name: "Left Leg & Knee",
+    view: "front",
+    cx: 225,
+    cy: 400,
+    path: "M 205 332 L 240 332 L 238 470 C 235 478 215 478 212 470 Z",
+  },
 
-  // Back View Regions
-  { id: "head_back", name: "Back of Head", view: "back", cx: 200, cy: 70, r: 32, labelPosition: { x: 310, y: 70 } },
-  { id: "upper_back", name: "Upper Back & Shoulders", view: "back", cx: 200, cy: 170, r: 38, labelPosition: { x: 310, y: 170 } },
-  { id: "lower_back", name: "Lower Back & Spine", view: "back", cx: 200, cy: 250, r: 36, labelPosition: { x: 310, y: 250 } },
-  { id: "glutes", name: "Hips & Lower Back", view: "back", cx: 200, cy: 315, r: 30, labelPosition: { x: 310, y: 315 } },
-  { id: "left_arm_back", name: "Left Arm (Back)", view: "back", cx: 135, cy: 220, r: 24, labelPosition: { x: 70, y: 220 } },
-  { id: "right_arm_back", name: "Right Arm (Back)", view: "back", cx: 265, cy: 220, r: 24, labelPosition: { x: 320, y: 220 } },
-  { id: "left_leg_back", name: "Left Leg (Back)", view: "back", cx: 165, cy: 400, r: 32, labelPosition: { x: 70, y: 400 } },
-  { id: "right_leg_back", name: "Right Leg (Back)", view: "back", cx: 235, cy: 400, r: 32, labelPosition: { x: 320, y: 400 } },
+  // BACK VIEW REGIONS
+  {
+    id: "head_back",
+    name: "Back of Head",
+    view: "back",
+    cx: 200,
+    cy: 65,
+    path: "M 200 23 C 220 23 236 41 236 65 C 236 89 220 107 200 107 C 180 107 164 89 164 65 C 164 41 180 23 200 23 Z",
+  },
+  {
+    id: "neck_back",
+    name: "Neck (Back)",
+    view: "back",
+    cx: 200,
+    cy: 120,
+    path: "M 186 107 L 214 107 L 214 133 L 186 133 Z",
+  },
+  {
+    id: "upper_back",
+    name: "Upper Back & Shoulders",
+    view: "back",
+    cx: 200,
+    cy: 171,
+    path: "M 144 133 C 165 130 235 130 256 133 L 252 210 L 148 210 Z",
+  },
+  {
+    id: "lower_back",
+    name: "Lower Back & Spine",
+    view: "back",
+    cx: 200,
+    cy: 248,
+    path: "M 148 212 L 252 212 L 244 285 L 156 285 Z",
+  },
+  {
+    id: "glutes",
+    name: "Hips & Glutes",
+    view: "back",
+    cx: 200,
+    cy: 311,
+    path: "M 156 287 L 244 287 L 238 335 L 162 335 Z",
+  },
+  {
+    id: "left_arm_back",
+    name: "Left Arm (Back)",
+    view: "back",
+    cx: 111,
+    cy: 220,
+    path: "M 141 136 C 128 145 118 185 110 235 L 96 310 C 94 320 86 320 88 310 L 104 230 C 112 180 124 142 141 136 Z",
+  },
+  {
+    id: "right_arm_back",
+    name: "Right Arm (Back)",
+    view: "back",
+    cx: 289,
+    cy: 220,
+    path: "M 259 136 C 272 145 282 185 290 235 L 304 310 C 306 320 314 320 312 310 L 296 230 C 288 180 276 142 259 136 Z",
+  },
+  {
+    id: "left_leg_back",
+    name: "Left Leg (Back)",
+    view: "back",
+    cx: 176,
+    cy: 400,
+    path: "M 162 337 L 196 337 L 189 470 C 186 478 166 478 163 470 Z",
+  },
+  {
+    id: "right_leg_back",
+    name: "Right Leg (Back)",
+    view: "back",
+    cx: 224,
+    cy: 400,
+    path: "M 204 337 L 238 337 L 237 470 C 234 478 214 478 211 470 Z",
+  },
 ];
 
 export function ScreenBodyMap() {
@@ -48,16 +174,16 @@ export function ScreenBodyMap() {
   useAutoSpeak(headline, HEADLINE);
 
   const [view, setView] = useState<"front" | "back">("front");
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<AnatomyRegion | null>(null);
   const [customDetail, setCustomDetail] = useState("");
 
-  const activeRegions = BODY_REGIONS.filter((r) => r.view === view);
+  const activeRegions = REGIONS.filter((r) => r.view === view);
 
-  const handleSelectRegion = (regionName: string) => {
-    setSelectedRegion(regionName);
+  const handleSelectRegion = (region: AnatomyRegion) => {
+    setSelectedRegion(region);
     const locationText = customDetail.trim()
-      ? `${regionName} (${customDetail.trim()})`
-      : regionName;
+      ? `${region.name} (${customDetail.trim()})`
+      : region.name;
     updateCase({ history: { location: locationText } });
   };
 
@@ -65,8 +191,8 @@ export function ScreenBodyMap() {
     setCustomDetail(text);
     if (selectedRegion) {
       const locationText = text.trim()
-        ? `${selectedRegion} (${text.trim()})`
-        : selectedRegion;
+        ? `${selectedRegion.name} (${text.trim()})`
+        : selectedRegion.name;
       updateCase({ history: { location: locationText } });
     }
   };
@@ -75,13 +201,13 @@ export function ScreenBodyMap() {
     <div className="flex h-full flex-col items-center justify-center px-10 pb-12 w-full">
       <div className="max-w-[880px] w-full bg-white/95 backdrop-blur-3xl p-10 rounded-card shadow-card border border-white/60 flex flex-col items-center min-h-[700px]">
 
-        {/* Top Title Bar */}
+        {/* Top Header */}
         <div className="text-center mb-6">
           <h1 className="text-display font-serif text-[#000B33] mb-2">
             {headline}
           </h1>
           <p className="text-body-lg text-[#000B33]/55 max-w-xl mx-auto mb-2">
-            {t("Tap on the body map below to pinpoint your exact pain location.")}
+            {t("Tap directly on any body part to pinpoint your exact pain location.")}
           </p>
           <button
             onClick={() => speak(headline)}
@@ -92,10 +218,10 @@ export function ScreenBodyMap() {
           </button>
         </div>
 
-        {/* Body Map Card Container */}
-        <div className="w-full max-w-[760px] bg-gradient-to-b from-gray-50/80 to-white rounded-card-sm border border-slate-200/90 shadow-sm p-6 flex flex-col items-center relative mb-6">
+        {/* Interactive Anatomy Card Container */}
+        <div className="w-full max-w-[760px] bg-gradient-to-b from-slate-50/80 to-white rounded-card-sm border border-slate-200/90 shadow-sm p-6 flex flex-col items-center relative mb-6">
 
-          {/* View Toggle Bar (Front / Back) */}
+          {/* View Indicator & Flip Controls */}
           <div className="flex items-center justify-between w-full mb-4 px-2">
             <div className="flex items-center gap-2 text-xs font-bold text-[#000B33]/60 uppercase tracking-wider">
               <MapPin size={16} className="text-[#1C718A]" />
@@ -103,7 +229,10 @@ export function ScreenBodyMap() {
             </div>
 
             <button
-              onClick={() => setView(view === "front" ? "back" : "front")}
+              onClick={() => {
+                setView(view === "front" ? "back" : "front");
+                setSelectedRegion(null);
+              }}
               className="flex items-center gap-2 px-5 py-2 rounded-full bg-white border border-gray-200 text-xs font-bold text-[#000B33] shadow-sm hover:border-[#1C718A] hover:text-[#1C718A] transition-all"
             >
               <RotateCw size={14} />
@@ -111,88 +240,81 @@ export function ScreenBodyMap() {
             </button>
           </div>
 
-          {/* Clean 2D Vector Human Silhouette & Interactive Hotspots */}
-          <div className="relative w-[400px] h-[480px] flex items-center justify-center select-none">
-            <svg viewBox="0 0 400 480" className="w-full h-full drop-shadow-sm">
-              {/* Clean Human Body Silhouette */}
-              <g fill="#EBF2F5" stroke="#B0C8D0" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round">
-                {/* Head */}
-                <ellipse cx="200" cy="70" rx="34" ry="40" />
-                
-                {/* Neck */}
-                <rect x="188" y="108" width="24" height="26" rx="6" />
-
-                {/* Torso / Shoulders */}
-                <path d="M 140 134 C 160 130, 240 130, 260 134 C 275 140, 275 170, 268 220 C 262 260, 255 310, 242 340 L 158 340 C 145 310, 138 260, 132 220 C 125 170, 125 140, 140 134 Z" />
-
-                {/* Left Arm */}
-                <path d="M 132 142 C 122 150, 115 190, 110 240 C 105 270, 102 300, 100 315 C 98 325, 90 325, 92 315 C 96 280, 108 210, 120 160 C 125 145, 128 140, 132 142 Z" />
-
-                {/* Right Arm */}
-                <path d="M 268 142 C 278 150, 285 190, 290 240 C 295 270, 298 300, 300 315 C 302 325, 310 325, 308 315 C 304 280, 292 210, 280 160 C 275 145, 272 140, 268 142 Z" />
-
-                {/* Left Leg */}
-                <path d="M 158 335 C 158 350, 155 410, 152 460 C 150 470, 166 470, 172 460 C 178 410, 185 360, 188 335 Z" />
-
-                {/* Right Leg */}
-                <path d="M 242 335 C 242 350, 245 410, 248 460 C 250 470, 234 470, 228 460 C 222 410, 215 360, 212 335 Z" />
-              </g>
-
-              {/* Interactive Hotspot Targets */}
+          {/* Perfectly Aligned Precision Anatomy SVG */}
+          <div className="relative w-[380px] h-[480px] flex items-center justify-center select-none bg-white/60 rounded-2xl border border-slate-100 p-2 shadow-inner">
+            <svg viewBox="0 0 400 500" className="w-full h-full">
+              
+              {/* Render Anatomical Regions with Exact Paths */}
               {activeRegions.map((region) => {
-                const isSelected = selectedRegion === region.name;
+                const isSelected = selectedRegion?.id === region.id;
 
                 return (
-                  <g key={region.id} className="cursor-pointer group" onClick={() => handleSelectRegion(region.name)}>
-                    {/* Glowing outer pulse when selected */}
-                    {isSelected && (
+                  <g
+                    key={region.id}
+                    onClick={() => handleSelectRegion(region)}
+                    className="cursor-pointer group"
+                  >
+                    {/* Anatomical Region Shape */}
+                    <path
+                      d={region.path}
+                      className={`transition-all duration-300 ${
+                        isSelected
+                          ? "fill-[#1C718A] stroke-[#000B33] stroke-[3] shadow-lg"
+                          : "fill-[#EBF2F5] stroke-[#B0C8D0] stroke-[2.5] hover:fill-[#1C718A]/30 hover:stroke-[#1C718A]"
+                      }`}
+                    />
+
+                    {/* Pin Target Marker exactly at (cx, cy) */}
+                    {isSelected ? (
+                      <g>
+                        {/* Outer Pulsing Ring */}
+                        <circle
+                          cx={region.cx}
+                          cy={region.cy}
+                          r="18"
+                          className="fill-[#1C718A]/30 stroke-white stroke-2 animate-ping"
+                        />
+                        {/* Inner Pin Target Dot */}
+                        <circle
+                          cx={region.cx}
+                          cy={region.cy}
+                          r="8"
+                          className="fill-white stroke-[#000B33] stroke-2 shadow-md"
+                        />
+                        <circle
+                          cx={region.cx}
+                          cy={region.cy}
+                          r="4"
+                          className="fill-[#1C718A]"
+                        />
+                      </g>
+                    ) : (
+                      /* Idle Spot Dot Indicator */
                       <circle
                         cx={region.cx}
                         cy={region.cy}
-                        r={region.r + 8}
-                        className="fill-[#1C718A]/20 stroke-[#1C718A]/60 animate-ping"
-                        strokeWidth="2"
+                        r="3.5"
+                        className="fill-[#1C718A]/40 group-hover:fill-[#1C718A] group-hover:r-5 transition-all"
                       />
                     )}
-
-                    {/* Hotspot Circle */}
-                    <circle
-                      cx={region.cx}
-                      cy={region.cy}
-                      r={region.r}
-                      className={`transition-all duration-300 ${
-                        isSelected
-                          ? "fill-[#1C718A] stroke-white shadow-lg"
-                          : "fill-white/80 stroke-[#1C718A]/40 hover:fill-[#1C718A]/30 hover:stroke-[#1C718A]"
-                      }`}
-                      strokeWidth={isSelected ? "3" : "2"}
-                    />
-
-                    {/* Inner Pin Dot */}
-                    <circle
-                      cx={region.cx}
-                      cy={region.cy}
-                      r={isSelected ? 6 : 4}
-                      className={isSelected ? "fill-white" : "fill-[#1C718A] group-hover:scale-125 transition-transform"}
-                    />
                   </g>
                 );
               })}
             </svg>
           </div>
 
-          {/* Quick Select Pill Buttons for Easy Touch */}
+          {/* Quick Select Buttons */}
           <div className="w-full pt-4 border-t border-slate-200/80 flex flex-col items-center">
             <span className="text-xs font-bold text-[#000B33]/40 uppercase mb-3 tracking-wider">
-              {t("Or tap a region below:")}
+              {t("Or tap a region name:")}
             </span>
             <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
               {activeRegions.map((region) => {
-                const isSelected = selectedRegion === region.name;
+                const isSelected = selectedRegion?.id === region.id;
                 return (
                   <button
                     key={region.id}
-                    onClick={() => handleSelectRegion(region.name)}
+                    onClick={() => handleSelectRegion(region)}
                     className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
                       isSelected
                         ? "bg-[#1C718A] text-white shadow-md scale-105"
@@ -207,37 +329,37 @@ export function ScreenBodyMap() {
           </div>
         </div>
 
-        {/* Selected Region Confirmation & Optional Details */}
+        {/* Selected Region Confirmation Card */}
         <AnimatePresence>
           {selectedRegion && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="w-full max-w-[760px] bg-emerald-50/80 border border-emerald-200 rounded-card-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6"
+              className="w-full max-w-[760px] bg-emerald-50/90 border border-emerald-200 rounded-card-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 shadow-sm"
             >
               <div className="flex items-center gap-3 text-left">
                 <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0" />
                 <div>
-                  <span className="text-xs font-bold text-emerald-800/60 uppercase tracking-wider block">{t("Selected Location")}</span>
-                  <span className="text-base font-bold text-emerald-950">{t(selectedRegion)}</span>
+                  <span className="text-xs font-bold text-emerald-800/60 uppercase tracking-wider block">{t("Pain Location Pinpointed")}</span>
+                  <span className="text-base font-bold text-emerald-950">{t(selectedRegion.name)}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <input
                   type="text"
-                  placeholder={t("Specific detail (e.g. Left side, Upper part)...")}
+                  placeholder={t("Specific detail (e.g. Sharp pain on left side)...")}
                   value={customDetail}
                   onChange={(e) => handleCustomDetailChange(e.target.value)}
-                  className="px-4 py-2 bg-white border border-emerald-200 rounded-full text-xs font-medium text-[#000B33] focus:outline-none focus:ring-2 focus:ring-emerald-400 w-full sm:w-[260px]"
+                  className="px-4 py-2 bg-white border border-emerald-200 rounded-full text-xs font-medium text-[#000B33] focus:outline-none focus:ring-2 focus:ring-emerald-400 w-full sm:w-[280px]"
                 />
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Bottom Actions */}
+        {/* Bottom Navigation Actions */}
         <div className="flex w-full justify-between items-center mt-auto max-w-md mx-auto">
           {selectedRegion ? (
             <button
