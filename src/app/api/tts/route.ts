@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
 
-// Standard high-quality ElevenLabs built-in premade voices (100% free-tier compatible)
-// Bella: Warm, clear, reassuring female tone (ideal for multilingual Hindi intake)
-// Adam: Professional, clear male tone (ideal for English intake)
 const VOICE_MAP: Record<string, string> = {
   Hindi: 'EXAVITQu4vr4xnSDxMaL',   // Bella (Multilingual V2)
   English: 'pNInz6obpgDQGcFmaJgB', // Adam (Multilingual V2)
 };
 
-const DEFAULT_VOICE = 'EXAVITQu4vr4xnSDxMaL'; // Bella fallback
+const DEFAULT_VOICE = 'EXAVITQu4vr4xnSDxMaL';
 
 export async function POST(req: Request) {
   try {
@@ -16,6 +13,13 @@ export async function POST(req: Request) {
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json({ error: 'Text prompt is required' }, { status: 400 });
+    }
+
+    // Security & Sanitization: Limit length & strip potentially malicious control characters
+    const sanitizedText = text.slice(0, 500).replace(/[\u0000-\u001F\u007F-\u009F]/g, "").trim();
+
+    if (!sanitizedText) {
+      return NextResponse.json({ error: 'Valid text prompt is required' }, { status: 400 });
     }
 
     const apiKey = process.env.ELEVENLABS_API_KEY;
@@ -35,7 +39,7 @@ export async function POST(req: Request) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        text,
+        text: sanitizedText,
         model_id: 'eleven_multilingual_v2',
         voice_settings: {
           stability: 0.5,
@@ -59,7 +63,7 @@ export async function POST(req: Request) {
       headers: {
         'Content-Type': 'audio/mpeg',
         'Content-Length': audioBuffer.byteLength.toString(),
-        'Cache-Control': 'public, max-age=3600'
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400'
       }
     });
   } catch (error) {

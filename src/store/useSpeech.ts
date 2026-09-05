@@ -39,8 +39,21 @@ function speakBrowserFallback(text: string, language: string, onEnd: () => void)
   window.speechSynthesis.speak(utterance);
 }
 
-// Global reference for HTML5 Audio playback from ElevenLabs
+// Memory tracking references for HTML5 Audio & Blob URL cleanup
 let activeAudio: HTMLAudioElement | null = null;
+let activeBlobUrl: string | null = null;
+
+function cleanupAudio() {
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio.currentTime = 0;
+    activeAudio = null;
+  }
+  if (activeBlobUrl) {
+    URL.revokeObjectURL(activeBlobUrl);
+    activeBlobUrl = null;
+  }
+}
 
 /** Manual speak/stop control with ElevenLabs TTS + Web Speech Fallback. */
 export function useSpeak() {
@@ -48,11 +61,7 @@ export function useSpeak() {
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   const stop = useCallback(() => {
-    if (activeAudio) {
-      activeAudio.pause();
-      activeAudio.currentTime = 0;
-      activeAudio = null;
-    }
+    cleanupAudio();
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -77,19 +86,19 @@ export function useSpeak() {
         if (res.ok && contentType.includes('audio/mpeg')) {
           const blob = await res.blob();
           const audioUrl = URL.createObjectURL(blob);
+          activeBlobUrl = audioUrl;
+
           const audio = new Audio(audioUrl);
           activeAudio = audio;
 
           audio.onended = () => {
             setIsSpeaking(false);
-            URL.revokeObjectURL(audioUrl);
-            activeAudio = null;
+            cleanupAudio();
           };
 
           audio.onerror = () => {
             setIsSpeaking(false);
-            URL.revokeObjectURL(audioUrl);
-            activeAudio = null;
+            cleanupAudio();
             speakBrowserFallback(text, language, () => setIsSpeaking(false));
           };
 
@@ -97,15 +106,21 @@ export function useSpeak() {
           return;
         }
 
-        // If ElevenLabs API key is not configured or returns fallback flag
         speakBrowserFallback(text, language, () => setIsSpeaking(false));
       } catch (err) {
         console.warn("ElevenLabs TTS failed, using fallback:", err);
+        cleanupAudio();
         speakBrowserFallback(text, language, () => setIsSpeaking(false));
       }
     },
     [language, stop]
   );
+
+  useEffect(() => {
+    return () => {
+      stop();
+    };
+  }, [stop]);
 
   return { speak, stop, isSpeaking };
 }
