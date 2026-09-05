@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { useStore } from "@/store/useStore";
-import { Mic, Keyboard, X } from "lucide-react";
+import { useT } from "@/store/useTranslation";
+import { useAutoSpeak, useSpeak } from "@/store/useSpeech";
+import { Mic, Keyboard, X, Volume2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Question = {
@@ -29,24 +31,28 @@ const QUESTIONS: Question[] = [
 
 export function ScreenInterview() {
   const { nextScreen, updateCase } = useStore();
+  const t = useT();
+  const { speak } = useSpeak();
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [history, setHistory] = useState<{q: string, a: string}[]>([]);
-  
+
   const [isTyping, setIsTyping] = useState(false);
   const [typedAnswer, setTypedAnswer] = useState("");
-  
+
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
 
   const currentQ = QUESTIONS[currentQIndex];
+  const questionText = t(currentQ.text);
+  useAutoSpeak(questionText, currentQ.text);
 
   const handleAnswer = (answer: string) => {
     if (!answer) return;
-    
+
     const newHistory = [...history, { q: currentQ.text, a: answer }];
-    
+
     // Save to global state (simple mapping)
     if (currentQ.id === "duration") updateCase({ history: { duration: answer } });
     if (currentQ.id === "quality") updateCase({ history: { quality: answer } });
@@ -91,17 +97,11 @@ export function ScreenInterview() {
       recognition.lang = "en-US";
 
       recognition.onstart = () => {
-        console.log("SpeechRecognition: started");
         setIsListening(true);
         setTranscript("");
       };
 
-      recognition.onspeechstart = () => {
-        console.log("SpeechRecognition: speech detected");
-      };
-
       recognition.onresult = (event: any) => {
-        console.log("SpeechRecognition: onresult fired", event);
         let fullTranscript = "";
         for (let i = 0; i < event.results.length; i++) {
           fullTranscript += event.results[i][0].transcript;
@@ -110,19 +110,18 @@ export function ScreenInterview() {
       };
 
       recognition.onend = () => {
-        console.log("SpeechRecognition: ended");
         setIsListening(false);
       };
 
       recognition.onerror = (event: any) => {
         console.error("Speech recognition error", event.error);
-        setVoiceError(`Microphone error: ${event.error}`);
+        setVoiceError(event.error);
         setIsListening(false);
       };
 
       recognition.start();
     } catch (err: any) {
-      setVoiceError(`Failed to start mic: ${err.message}`);
+      setVoiceError(err.message);
     }
   };
 
@@ -146,43 +145,52 @@ export function ScreenInterview() {
   return (
     <div className="flex h-full flex-col items-center justify-center px-10 pb-12 w-full">
       <AnimatePresence mode="wait">
-        <motion.div 
+        <motion.div
           key={currentQ.id}
-          initial={{ opacity: 0, x: 20 }}
+          initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-          className="bg-[#FDFBF7]/95 backdrop-blur-3xl rounded-[40px] p-12 shadow-[0_8px_40px_rgb(0,0,0,0.08)] border border-white/50 flex flex-col items-center w-full max-w-[800px] min-h-[600px]"
+          exit={{ opacity: 0, x: -24 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="bg-white/95 backdrop-blur-3xl rounded-card p-12 shadow-card border border-white/60 flex flex-col items-center w-full max-w-[780px] min-h-[600px]"
         >
           <div className="flex justify-between items-start w-full mb-12">
-            <h2 className="text-[38px] font-serif leading-[1.1] tracking-tight text-[#000B33] max-w-xl text-left">
-              {currentQ.text}
-            </h2>
+            <div className="max-w-xl text-left">
+              <h2 className="text-display font-serif leading-[1.1] text-[#000B33] mb-2">
+                {questionText}
+              </h2>
+              <button
+                onClick={() => speak(questionText)}
+                className="inline-flex items-center gap-2 text-label font-bold text-[#1C718A] uppercase hover:opacity-70 transition-opacity"
+              >
+                <Volume2 className="h-4 w-4" />
+                {t("Listen again")}
+              </button>
+            </div>
             <div className="flex gap-2 shrink-0 pt-3">
               {QUESTIONS.map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`h-2.5 w-2.5 rounded-full transition-colors ${
-                    i === currentQIndex ? "bg-[#000B33]" : i < currentQIndex ? "bg-[#000B33]/30" : "bg-gray-200"
-                  }`} 
+                <div
+                  key={i}
+                  className={`h-2 w-2 rounded-full transition-colors duration-300 ${
+                    i === currentQIndex ? "bg-[#000B33]" : i < currentQIndex ? "bg-[#000B33]/30" : "bg-black/10"
+                  }`}
                 />
               ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 w-full mb-auto">
+          <div className="grid grid-cols-2 gap-3 w-full mb-auto">
             {currentQ.options.map((opt) => (
               <button
                 key={opt}
                 onClick={() => handleAnswer(opt)}
                 disabled={isListening}
-                className={`py-5 px-6 text-[19px] font-semibold rounded-[20px] bg-white border shadow-sm transition-all text-left ${
-                  isListening 
-                    ? "border-gray-100 text-gray-300 cursor-not-allowed opacity-50" 
-                    : "border-gray-200 hover:border-[#000B33] text-[#000B33] hover:shadow-md active:scale-[0.98]"
+                className={`py-4 px-6 text-body font-medium rounded-card-sm bg-white border transition-all duration-300 ease-premium text-left ${
+                  isListening
+                    ? "border-black/5 text-[#000B33]/25 cursor-not-allowed"
+                    : "border-black/10 hover:border-[#000B33]/30 text-[#000B33] active:scale-[0.98]"
                 }`}
               >
-                {opt}
+                {t(opt)}
               </button>
             ))}
           </div>
@@ -195,39 +203,39 @@ export function ScreenInterview() {
                   autoFocus
                   value={typedAnswer}
                   onChange={(e) => setTypedAnswer(e.target.value)}
-                  placeholder="Type your answer here..."
-                  className="w-full bg-white border border-gray-200 rounded-[20px] p-6 text-[19px] text-[#000B33] placeholder:text-[#000B33]/40 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#000B33]/20 focus:border-[#000B33]/50 min-h-[120px] resize-none mb-4"
+                  placeholder={t("Type your answer here...")}
+                  className="w-full bg-white border border-black/10 rounded-card-sm p-6 text-body text-[#000B33] placeholder:text-[#000B33]/35 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#1C718A]/25 focus:border-[#1C718A]/40 min-h-[120px] resize-none mb-4 transition-all duration-300 ease-premium"
                 />
-                <div className="flex gap-4 w-full max-w-md mx-auto">
+                <div className="flex gap-3 w-full max-w-md mx-auto">
                   <button
                     type="button"
                     onClick={() => setIsTyping(false)}
-                    className="flex-1 py-4 rounded-[20px] bg-gray-100 text-[#000B33] font-semibold text-[18px] hover:bg-gray-200 transition-colors"
+                    className="flex-1 py-4 rounded-full bg-black/5 text-[#000B33] font-semibold text-body hover:bg-black/10 transition-colors duration-300 ease-premium"
                   >
-                    Cancel
+                    {t("Cancel")}
                   </button>
                   <button
                     type="submit"
                     disabled={!typedAnswer.trim()}
-                    className="flex-1 py-4 rounded-[20px] bg-[#000B33] text-white font-semibold text-[18px] hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 py-4 rounded-full bg-[#000B33] text-white font-semibold text-body hover:bg-black transition-colors duration-300 ease-premium disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    Submit
+                    {t("Submit")}
                   </button>
                 </div>
               </form>
             ) : (
               <div className="flex flex-col items-center">
-                
+
                 {/* Live Transcript Display */}
                 <div className="h-[60px] flex flex-col items-center justify-center mb-4 px-4 w-full text-center">
                   {voiceError ? (
-                    <p className="text-[17px] text-red-500 font-medium">{voiceError}</p>
+                    <p className="text-body text-red-500 font-medium">{t("Microphone error:")} {voiceError}</p>
                   ) : isListening ? (
-                    <motion.p 
+                    <motion.p
                       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                      className="text-[22px] text-[#000B33] font-medium italic"
+                      className="text-body-lg text-[#000B33] font-medium italic"
                     >
-                      "{transcript || "Listening..."}"
+                      "{transcript || t("Listening...")}"
                     </motion.p>
                   ) : null}
                 </div>
@@ -235,36 +243,36 @@ export function ScreenInterview() {
                 {/* The Circular Voice Button from User's Design */}
                 <button
                   onClick={isListening ? stopAndSubmit : startListening}
-                  className={`relative flex flex-col items-center justify-center h-[200px] w-[200px] rounded-full bg-white shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-gray-100 transition-all group ${
-                    isListening ? "scale-105 shadow-[0_8px_40px_rgb(44,95,85,0.2)] border-[#2C5F55]/20 ring-4 ring-[#2C5F55]/10" : "hover:scale-[1.02] active:scale-[0.98]"
+                  className={`relative flex flex-col items-center justify-center h-[196px] w-[196px] rounded-full bg-white shadow-float border border-black/5 transition-all duration-300 ease-premium group ${
+                    isListening ? "scale-105 shadow-[0_12px_32px_-4px_rgba(28,113,138,0.3)] border-[#1C718A]/20 ring-4 ring-[#1C718A]/10" : "hover:scale-[1.02] active:scale-[0.98]"
                   }`}
                 >
                   {isListening && (
-                    <span 
+                    <span
                       onClick={(e) => { e.stopPropagation(); stopListening(); }}
-                      className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 hover:text-black z-10"
+                      className="absolute top-4 right-4 p-2 bg-black/5 rounded-full text-[#000B33]/50 hover:bg-black/10 hover:text-[#000B33] z-10 transition-colors"
                     >
                       <X size={16} />
                     </span>
                   )}
-                  
-                  <div className={`flex items-center justify-center h-[88px] w-[88px] rounded-full mb-3 transition-colors ${
-                    isListening ? "bg-[#2C5F55] text-white animate-pulse" : "bg-[#F0F7F6] text-[#2C5F55] group-hover:bg-[#E2F0ED]"
+
+                  <div className={`flex items-center justify-center h-[86px] w-[86px] rounded-full mb-3 transition-colors duration-300 ${
+                    isListening ? "bg-[#1C718A] text-white animate-pulse" : "bg-[#E8F2F4] text-[#1C718A] group-hover:bg-[#DCEEF1]"
                   }`}>
-                    <Mic className="h-9 w-9 stroke-[2.5]" />
+                    <Mic className="h-8 w-8 stroke-[2.2]" />
                   </div>
-                  <span className="text-[20px] font-bold text-[#000B33]">
-                    {isListening ? "Submit Answer" : "Tap to speak"}
+                  <span className="text-[18px] font-semibold text-[#000B33]">
+                    {isListening ? t("Submit Answer") : t("Tap to speak")}
                   </span>
                 </button>
 
                 {!isListening && (
-                  <button 
+                  <button
                     onClick={() => setIsTyping(true)}
-                    className="mt-6 flex items-center gap-2 text-[#000B33]/50 hover:text-[#000B33] font-semibold text-[17px] transition-colors py-2 px-6 rounded-full hover:bg-black/5"
+                    className="mt-6 flex items-center gap-2 text-[#000B33]/45 hover:text-[#000B33] font-medium text-[15px] transition-colors duration-300 ease-premium py-2 px-6 rounded-full hover:bg-black/5"
                   >
-                    <Keyboard className="h-5 w-5" />
-                    <span>I'd rather type</span>
+                    <Keyboard className="h-[17px] w-[17px]" />
+                    <span>{t("I'd rather type")}</span>
                   </button>
                 )}
 

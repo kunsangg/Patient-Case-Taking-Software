@@ -101,13 +101,13 @@ export function ScreenAbhaScan() {
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-10 pb-12 w-full">
-      <div className="max-w-[480px] w-full bg-[#FDFBF7]/95 backdrop-blur-3xl p-8 rounded-[32px] shadow-[0_8px_40px_rgb(0,0,0,0.08)] border border-white/50 flex flex-col items-center text-center">
-        
-        <div className="w-full h-[600px] relative rounded-[20px] overflow-hidden bg-white/50 border border-gray-200" id="abha_sdk_container">
+      <div className="max-w-[480px] w-full bg-white/95 backdrop-blur-3xl p-8 rounded-card shadow-card border border-white/60 flex flex-col items-center text-center">
+
+        <div className="w-full h-[600px] relative rounded-card-sm overflow-hidden bg-white/50 border border-black/10" id="abha_sdk_container">
           {!sdkLoaded && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#000B33]/20 border-t-[#000B33]" />
-              <span className="text-[#000B33]/60 font-medium animate-pulse">
+              <span className="text-[#000B33]/55 font-medium animate-pulse">
                 Loading Secure ABHA Portal...
               </span>
             </div>
@@ -116,7 +116,7 @@ export function ScreenAbhaScan() {
 
         <button
           onClick={() => setScreen(2)}
-          className="mt-6 text-[#000B33]/50 font-semibold text-[17px] hover:text-[#000B33] transition-colors"
+          className="mt-6 text-[#000B33]/50 font-semibold text-body hover:text-[#000B33] transition-colors duration-300 ease-premium"
         >
           Skip for now
         </button>

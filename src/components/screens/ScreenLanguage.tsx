@@ -14,7 +14,7 @@ const LANGUAGES = [
 
 export function ScreenLanguage() {
   const { setLanguage, setScreen } = useStore();
-  
+
   const handleSelect = (lang: string) => {
     setLanguage(lang);
     setScreen(4); // Go to Intake Home
@@ -23,26 +23,26 @@ export function ScreenLanguage() {
   return (
     <div className="flex h-full flex-col items-center justify-center px-10 pb-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-semibold tracking-tight text-white mb-4">
+        <h1 className="text-display font-serif text-white mb-3">
           Please select your preferred language
         </h1>
-        <p className="text-lg text-white/90 font-medium">
+        <p className="text-body-lg text-white/70">
           Your entire intake experience will be translated in real-time.
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-6 w-full max-w-4xl">
+      <div className="grid grid-cols-3 gap-5 w-full max-w-4xl">
         {LANGUAGES.map((lang) => (
           <button
             key={lang.english}
             onClick={() => handleSelect(lang.english)}
-            className="group flex flex-col items-center justify-center py-8 rounded-[24px] bg-[#FDFBF7]/95 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white/50 hover:bg-white hover:scale-[1.03] active:scale-[0.98] transition-all"
+            className="group flex flex-col items-center justify-center py-8 rounded-card-sm bg-white/95 backdrop-blur-3xl shadow-card border border-white/60 transition-all duration-300 ease-premium hover:bg-white hover:-translate-y-0.5"
           >
-            <span className="text-4xl font-semibold text-[#000B33] mb-3 group-hover:text-blue-600 transition-colors">
+            <span className="text-title font-serif text-[#000B33] mb-2 group-hover:text-[#1C718A] transition-colors">
               {lang.script}
             </span>
             {lang.script !== lang.english && (
-              <span className="text-lg font-medium text-[#000B33]/60 group-hover:text-blue-600/80 transition-colors">
+              <span className="text-[15px] font-medium text-[#000B33]/50 group-hover:text-[#1C718A]/80 transition-colors">
                 {lang.english}
               </span>
             )}

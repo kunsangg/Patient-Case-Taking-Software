@@ -59,10 +59,10 @@ export default function Home() {
       {currentScreen > 1 && currentScreen < 9 && (
         <button
           onClick={prevScreen}
-          className="absolute top-10 left-10 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-white/15 backdrop-blur-2xl border border-white/20 text-white shadow-lg transition-all hover:bg-white/25 hover:scale-[1.05] active:scale-95"
+          className="absolute top-10 left-10 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 backdrop-blur-2xl border border-white/15 text-white transition-all duration-300 ease-premium hover:bg-white/20 active:scale-95"
           aria-label="Go back"
         >
-          <ArrowLeft className="h-5 w-5 stroke-[2.5]" />
+          <ArrowLeft className="h-5 w-5 stroke-[2]" />
         </button>
       )}
 
@@ -70,10 +70,10 @@ export default function Home() {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentScreen}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            exit={{ opacity: 0, y: -14 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 flex flex-col"
           >
             {renderScreen()}

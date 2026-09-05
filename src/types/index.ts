@@ -1,6 +1,7 @@
 export interface PatientCase {
   patientId: string;
   encounterId: string;
+  patientName?: string;
   chiefComplaint: {
     symptom: string;
     duration?: string;
@@ -13,6 +14,8 @@ export interface PatientCase {
     radiation?: string;
     aggravatingFactors?: string;
     relievingFactors?: string;
+    duration?: string;
+    quality?: string;
   };
   medications: Medication[];
   allergies: string[];
