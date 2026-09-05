@@ -14,6 +14,7 @@ const LANG_CODES: Record<string, string> = {
 };
 
 function pickVoice(langCode: string): SpeechSynthesisVoice | undefined {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return undefined;
   const voices = window.speechSynthesis.getVoices();
   const base = langCode.split('-')[0].toLowerCase();
   return (
@@ -22,7 +23,7 @@ function pickVoice(langCode: string): SpeechSynthesisVoice | undefined {
   );
 }
 
-function speakNow(text: string, language: string, onEnd: () => void) {
+function speakBrowserFallback(text: string, language: string, onEnd: () => void) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window) || !text) return;
   window.speechSynthesis.cancel();
 
@@ -38,37 +39,79 @@ function speakNow(text: string, language: string, onEnd: () => void) {
   window.speechSynthesis.speak(utterance);
 }
 
-/** Manual speak/stop control, bound to the currently selected language. */
+// Global reference for HTML5 Audio playback from ElevenLabs
+let activeAudio: HTMLAudioElement | null = null;
+
+/** Manual speak/stop control with ElevenLabs TTS + Web Speech Fallback. */
 export function useSpeak() {
   const language = useStore((s) => s.language);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
-  const speak = useCallback(
-    (text: string) => {
-      if (!text) return;
-      setIsSpeaking(true);
-      speakNow(text, language, () => setIsSpeaking(false));
-    },
-    [language]
-  );
-
   const stop = useCallback(() => {
+    if (activeAudio) {
+      activeAudio.pause();
+      activeAudio.currentTime = 0;
+      activeAudio = null;
+    }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
     setIsSpeaking(false);
   }, []);
 
+  const speak = useCallback(
+    async (text: string) => {
+      if (!text) return;
+      stop();
+      setIsSpeaking(true);
+
+      try {
+        const res = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, language })
+        });
+
+        const contentType = res.headers.get('content-type') || '';
+
+        if (res.ok && contentType.includes('audio/mpeg')) {
+          const blob = await res.blob();
+          const audioUrl = URL.createObjectURL(blob);
+          const audio = new Audio(audioUrl);
+          activeAudio = audio;
+
+          audio.onended = () => {
+            setIsSpeaking(false);
+            URL.revokeObjectURL(audioUrl);
+            activeAudio = null;
+          };
+
+          audio.onerror = () => {
+            setIsSpeaking(false);
+            URL.revokeObjectURL(audioUrl);
+            activeAudio = null;
+            speakBrowserFallback(text, language, () => setIsSpeaking(false));
+          };
+
+          await audio.play();
+          return;
+        }
+
+        // If ElevenLabs API key is not configured or returns fallback flag
+        speakBrowserFallback(text, language, () => setIsSpeaking(false));
+      } catch (err) {
+        console.warn("ElevenLabs TTS failed, using fallback:", err);
+        speakBrowserFallback(text, language, () => setIsSpeaking(false));
+      }
+    },
+    [language, stop]
+  );
+
   return { speak, stop, isSpeaking };
 }
 
 /**
- * Auto-speaks `text` whenever it changes, once it's actually ready to be
- * heard: either the patient chose English (nothing to wait for), or the
- * live translation of `sourceText` has resolved. Speaking the raw English
- * fallback while a translation is still in flight would narrate the prompt
- * twice — once in English, once in the target language — so that case is
- * skipped and the effect re-fires on its own once the real text lands.
+ * Auto-speaks `text` whenever it changes, once it's actually ready to be heard.
  */
 export function useAutoSpeak(text: string, sourceText: string) {
   const language = useStore((s) => s.language);

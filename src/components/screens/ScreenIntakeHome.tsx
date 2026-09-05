@@ -2,8 +2,9 @@ import { useState, useRef } from "react";
 import { useStore } from "@/store/useStore";
 import { useT } from "@/store/useTranslation";
 import { useAutoSpeak, useSpeak } from "@/store/useSpeech";
-import { Mic, Keyboard, X, Volume2 } from "lucide-react";
+import { Keyboard, Volume2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { VoiceMicButton } from "@/components/VoiceMicButton";
 
 const COMMON_COMPLAINTS = [
   "Chest pain",
@@ -176,36 +177,20 @@ export function ScreenIntakeHome() {
                 ) : null}
               </div>
 
-              {/* The Circular Voice Button */}
-              <button
-                onClick={isListening ? stopAndSubmit : startListening}
-                className={`relative flex flex-col items-center justify-center h-[176px] w-[176px] rounded-full bg-white shadow-float border border-black/5 transition-all duration-300 ease-premium group ${
-                  isListening ? "scale-105 shadow-[0_12px_32px_-4px_rgba(28,113,138,0.3)] border-[#1C718A]/20 ring-4 ring-[#1C718A]/10" : "hover:scale-[1.02] active:scale-[0.98]"
-                }`}
-              >
-                {isListening && (
-                  <span
-                    onClick={(e) => { e.stopPropagation(); stopListening(); }}
-                    className="absolute top-2 right-2 p-2 bg-black/5 rounded-full text-[#000B33]/50 hover:bg-black/10 hover:text-[#000B33] z-10 transition-colors"
-                  >
-                    <X size={14} />
-                  </span>
-                )}
-
-                <div className={`flex items-center justify-center h-[74px] w-[74px] rounded-full mb-3 transition-colors duration-300 ${
-                  isListening ? "bg-[#1C718A] text-white animate-pulse" : "bg-[#E8F2F4] text-[#1C718A] group-hover:bg-[#DCEEF1]"
-                }`}>
-                  <Mic className="h-7 w-7 stroke-[2.2]" />
-                </div>
-                <span className="text-[17px] font-semibold text-[#000B33]">
-                  {isListening ? t("Submit") : t("Tap to speak")}
-                </span>
-              </button>
+              {/* Improvised Professional Voice Mic Button */}
+              <VoiceMicButton
+                isListening={isListening}
+                onStart={startListening}
+                onStopAndSubmit={stopAndSubmit}
+                onCancel={stopListening}
+                submitLabel="Submit Complaint"
+                idleLabel="Tap to speak"
+              />
 
               {!isListening && (
                 <button
                   onClick={() => setIsTyping(true)}
-                  className="mt-5 flex items-center gap-2 text-[#000B33]/45 hover:text-[#000B33] font-medium text-[15px] transition-colors duration-300 ease-premium py-2 px-6 rounded-full hover:bg-black/5"
+                  className="mt-6 flex items-center gap-2 text-[#000B33]/45 hover:text-[#000B33] font-medium text-[15px] transition-colors duration-300 ease-premium py-2 px-6 rounded-full hover:bg-black/5"
                 >
                   <Keyboard className="h-[17px] w-[17px]" />
                   <span>{t("I'd rather type")}</span>

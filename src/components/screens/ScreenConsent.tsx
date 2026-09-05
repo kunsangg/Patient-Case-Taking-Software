@@ -1,4 +1,5 @@
 import { useStore } from "@/store/useStore";
+import { useT } from "@/store/useTranslation";
 import { ShieldCheck, Mic, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -10,17 +11,18 @@ const ITEMS = [
 
 export function ScreenConsent() {
   const nextScreen = useStore((state) => state.nextScreen);
+  const t = useT();
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-10 pb-12">
       <div className="max-w-2xl w-full bg-white/95 backdrop-blur-3xl p-12 rounded-card shadow-card border border-white/60 flex flex-col text-left">
 
         <h1 className="text-display font-serif text-[#000B33] mb-4">
-          A quick word of trust
+          {t("A quick word of trust")}
         </h1>
 
         <p className="text-body-lg leading-relaxed text-[#000B33]/60 mb-10">
-          We'll only ask what helps the doctor understand you today. You can skip anything that feels too much.
+          {t("We'll only ask what helps the doctor understand you today. You can skip anything that feels too much.")}
         </p>
 
         <div className="flex flex-col gap-7 mb-12">
@@ -36,8 +38,8 @@ export function ScreenConsent() {
                 <Icon className="h-5 w-5 stroke-[2.2]" />
               </div>
               <div className="flex flex-col pt-1">
-                <h3 className="text-body font-semibold text-[#000B33] mb-1">{title}</h3>
-                <p className="text-[15px] leading-relaxed text-[#000B33]/55">{body}</p>
+                <h3 className="text-body font-semibold text-[#000B33] mb-1">{t(title)}</h3>
+                <p className="text-[15px] leading-relaxed text-[#000B33]/55">{t(body)}</p>
               </div>
             </motion.div>
           ))}
@@ -48,7 +50,7 @@ export function ScreenConsent() {
             onClick={nextScreen}
             className="flex items-center justify-center w-full max-w-sm rounded-full bg-[#000B33] px-8 py-5 text-body font-semibold text-white transition-all duration-300 ease-premium hover:bg-black active:scale-[0.98]"
           >
-            I understand & continue
+            {t("I understand & continue")}
           </button>
         </div>
       </div>

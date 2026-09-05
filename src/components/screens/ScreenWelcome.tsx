@@ -1,7 +1,9 @@
 import { useStore } from "@/store/useStore";
+import { useT } from "@/store/useTranslation";
 
 export function ScreenWelcome() {
   const { setScreen, setIsNewPatient } = useStore();
+  const t = useT();
 
   const handleSelect = (isNew: boolean) => {
     setIsNewPatient(isNew);
@@ -27,10 +29,10 @@ export function ScreenWelcome() {
 
         <div className="flex flex-col items-center max-w-2xl my-16">
           <h1 className="text-hero font-serif text-[#000B33] mb-7">
-            Tell us how you're feeling.<br />We'll listen.
+            {t("Tell us how you're feeling.")}<br />{t("We'll listen.")}
           </h1>
           <p className="text-body-lg text-[#000B33]/55 max-w-[480px]">
-            A few calm questions before you see the doctor. Speak, tap, or both — at your pace.
+            {t("A few calm questions before you see the doctor. Speak, tap, or both — at your pace.")}
           </p>
         </div>
 
@@ -39,7 +41,7 @@ export function ScreenWelcome() {
             onClick={() => handleSelect(true)}
             className="w-full rounded-full bg-[#000B33] py-5 text-body font-semibold text-white transition-all duration-300 ease-premium hover:bg-black active:scale-[0.98]"
           >
-            Get started
+            {t("Get started")}
           </button>
 
           <div className="flex gap-3 w-full">
@@ -47,13 +49,13 @@ export function ScreenWelcome() {
               onClick={() => handleSelect(false)}
               className="flex-1 rounded-full bg-white border border-black/10 py-4 text-body font-medium text-[#000B33] transition-all duration-300 ease-premium hover:border-[#000B33]/30"
             >
-              I have an ABHA ID
+              {t("I have an ABHA ID")}
             </button>
             <button
               onClick={() => handleSelect(true)}
               className="flex-1 rounded-full bg-white border border-black/10 py-4 text-body font-medium text-[#000B33] transition-all duration-300 ease-premium hover:border-[#000B33]/30"
             >
-              I'm new here
+              {t("I'm new here")}
             </button>
           </div>
         </div>

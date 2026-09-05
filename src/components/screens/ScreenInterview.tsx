@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useStore } from "@/store/useStore";
 import { useT } from "@/store/useTranslation";
 import { useAutoSpeak, useSpeak } from "@/store/useSpeech";
-import { Mic, Keyboard, X, Volume2 } from "lucide-react";
+import { Keyboard, Volume2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { VoiceMicButton } from "@/components/VoiceMicButton";
 
 type Question = {
   id: string;
@@ -328,50 +329,25 @@ export function ScreenInterview() {
                   ) : null}
                 </div>
 
-                {/* Circular Voice Button */}
+              {/* Improvised Professional Voice Mic Button */}
+              <VoiceMicButton
+                isListening={isListening}
+                onStart={startListening}
+                onStopAndSubmit={stopAndSubmit}
+                onCancel={stopListening}
+                submitLabel="Submit Answer"
+                idleLabel="Tap to speak"
+              />
+
+              {!isListening && (
                 <button
-                  onClick={isListening ? stopAndSubmit : startListening}
-                  className={`relative flex flex-col items-center justify-center h-[180px] w-[180px] rounded-full bg-white shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-gray-100 transition-all group ${
-                    isListening
-                      ? "scale-105 shadow-[0_8px_40px_rgb(44,95,85,0.2)] border-[#2C5F55]/20 ring-4 ring-[#2C5F55]/10"
-                      : "hover:scale-[1.02] active:scale-[0.98]"
-                  }`}
+                  onClick={() => setIsTyping(true)}
+                  className="mt-6 flex items-center gap-2 text-[#000B33]/50 hover:text-[#000B33] font-semibold text-[16px] transition-colors py-2 px-6 rounded-full hover:bg-black/5"
                 >
-                  {isListening && (
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        stopListening();
-                      }}
-                      className="absolute top-3 right-3 p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 hover:text-black z-10"
-                    >
-                      <X size={16} />
-                    </span>
-                  )}
-
-                  <div
-                    className={`flex items-center justify-center h-[76px] w-[76px] rounded-full mb-2 transition-colors ${
-                      isListening
-                        ? "bg-[#2C5F55] text-white animate-pulse"
-                        : "bg-[#F0F7F6] text-[#2C5F55] group-hover:bg-[#E2F0ED]"
-                    }`}
-                  >
-                    <Mic className="h-8 w-8 stroke-[2.5]" />
-                  </div>
-                  <span className="text-[18px] font-bold text-[#000B33]">
-                    {isListening ? t("Submit Answer") : t("Tap to speak")}
-                  </span>
+                  <Keyboard className="h-4 w-4" />
+                  <span>{t("I'd rather type")}</span>
                 </button>
-
-                {!isListening && (
-                  <button
-                    onClick={() => setIsTyping(true)}
-                    className="mt-4 flex items-center gap-2 text-[#000B33]/50 hover:text-[#000B33] font-semibold text-[16px] transition-colors py-2 px-6 rounded-full hover:bg-black/5"
-                  >
-                    <Keyboard className="h-4 w-4" />
-                    <span>{t("I'd rather type")}</span>
-                  </button>
-                )}
+              )}
               </div>
             )}
           </div>

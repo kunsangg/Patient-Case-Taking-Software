@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useStore } from "@/store/useStore";
+import { useT } from "@/store/useTranslation";
 import { QRCodeSVG } from "qrcode.react";
 import { QrCode, Smartphone, ShieldCheck, ArrowRight, CheckCircle2 } from "lucide-react";
 
@@ -11,6 +12,7 @@ declare global {
 
 export function ScreenAbhaScan() {
   const { setScreen, updateCase, setAbhaProfile } = useStore();
+  const t = useT();
   const [sdkMounted, setSdkMounted] = useState(false);
   const [mode, setMode] = useState<"scan" | "mobile" | "otp">("scan");
   const [abhaInput, setAbhaInput] = useState("");
@@ -158,7 +160,7 @@ export function ScreenAbhaScan() {
                     ABDM
                   </div>
                   <div>
-                    <h3 className="text-[15px] font-bold text-[#000B33] leading-tight">ABHA Health Portal</h3>
+                    <h3 className="text-[15px] font-bold text-[#000B33] leading-tight">{t("ABHA Health Portal")}</h3>
                     <p className="text-[11px] text-[#000B33]/50 font-medium">Ayushman Bharat Digital Mission</p>
                   </div>
                 </div>
@@ -173,7 +175,7 @@ export function ScreenAbhaScan() {
                     mode === "scan" ? "bg-white text-[#000B33] shadow-sm" : "text-gray-500 hover:text-black"
                   }`}
                 >
-                  <QrCode size={14} /> Scan & Share
+                  <QrCode size={14} /> {t("Scan & Share")}
                 </button>
                 <button
                   onClick={() => setMode("mobile")}
@@ -181,7 +183,7 @@ export function ScreenAbhaScan() {
                     mode === "mobile" || mode === "otp" ? "bg-white text-[#000B33] shadow-sm" : "text-gray-500 hover:text-black"
                   }`}
                 >
-                  <Smartphone size={14} /> ABHA / Mobile
+                  <Smartphone size={14} /> ABHA / {t("Mobile")}
                 </button>
               </div>
 
@@ -196,14 +198,14 @@ export function ScreenAbhaScan() {
                       includeMargin={false}
                     />
                   </div>
-                  <p className="text-sm font-semibold text-[#000B33] mb-1">Scan QR code using ABHA App</p>
-                  <p className="text-xs text-gray-500 max-w-xs mb-4">Open Aarogya Setu or ABHA App & scan to share health profile instantly.</p>
+                  <p className="text-sm font-semibold text-[#000B33] mb-1">{t("Scan QR code using ABHA App")}</p>
+                  <p className="text-xs text-gray-500 max-w-xs mb-4">{t("Open Aarogya Setu or ABHA App & scan to share health profile instantly.")}</p>
                   
                   <button
                     onClick={() => handleSuccessProfile()}
                     className="w-full py-3.5 bg-[#1C3E7B] text-white rounded-2xl font-semibold text-sm hover:bg-[#142d5a] transition-all flex items-center justify-center gap-2 shadow-md shrink-0"
                   >
-                    <span>Simulate Scan & Authorize</span>
+                    <span>{t("Simulate Scan & Authorize")}</span>
                     <ArrowRight size={16} />
                   </button>
                 </div>
@@ -214,7 +216,7 @@ export function ScreenAbhaScan() {
                   {mode === "mobile" ? (
                     <>
                       <label className="text-xs font-bold text-[#000B33]/70 mb-2 uppercase tracking-wider">
-                        Enter ABHA Number or Mobile
+                        {t("Enter ABHA Number or Mobile")}
                       </label>
                       <input
                         type="text"
@@ -225,13 +227,13 @@ export function ScreenAbhaScan() {
                         className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-medium text-[#000B33] mb-4 focus:outline-none focus:ring-2 focus:ring-[#1C3E7B]/30 focus:bg-white"
                       />
                       <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-                        An OTP will be sent to the registered mobile number for identity verification.
+                        {t("An OTP will be sent to the registered mobile number for identity verification.")}
                       </p>
                       <button
                         type="submit"
                         className="w-full py-3.5 bg-[#1C3E7B] text-white rounded-2xl font-semibold text-sm hover:bg-[#142d5a] transition-all flex items-center justify-center gap-2 shadow-md mt-auto"
                       >
-                        <span>Send OTP</span>
+                        <span>{t("Send OTP")}</span>
                         <ArrowRight size={16} />
                       </button>
                     </>
@@ -239,10 +241,10 @@ export function ScreenAbhaScan() {
                     <>
                       <div className="flex items-center gap-2 mb-4 text-emerald-600 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
                         <CheckCircle2 size={18} />
-                        <span className="text-xs font-semibold">OTP sent to registered mobile</span>
+                        <span className="text-xs font-semibold">{t("OTP sent to registered mobile")}</span>
                       </div>
                       <label className="text-xs font-bold text-[#000B33]/70 mb-2 uppercase tracking-wider">
-                        Enter 6-Digit OTP
+                        {t("Enter 6-Digit OTP")}
                       </label>
                       <input
                         type="text"
@@ -257,7 +259,7 @@ export function ScreenAbhaScan() {
                         type="submit"
                         className="w-full py-3.5 bg-[#1C3E7B] text-white rounded-2xl font-semibold text-sm hover:bg-[#142d5a] transition-all flex items-center justify-center gap-2 shadow-md mt-auto"
                       >
-                        <span>Verify & Fetch Profile</span>
+                        <span>{t("Verify & Fetch Profile")}</span>
                         <ArrowRight size={16} />
                       </button>
                     </>
@@ -278,7 +280,7 @@ export function ScreenAbhaScan() {
           onClick={handleSkip}
           className="mt-6 text-[#000B33]/50 font-semibold text-[17px] hover:text-[#000B33] transition-colors"
         >
-          Skip for now
+          {t("Skip for now")}
         </button>
       </div>
     </div>
