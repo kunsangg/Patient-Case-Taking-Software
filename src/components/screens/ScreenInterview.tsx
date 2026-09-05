@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useStore } from "@/store/useStore";
-import { Mic, Keyboard, X, Sparkles, BrainCircuit } from "lucide-react";
+import { useT } from "@/store/useTranslation";
+import { useAutoSpeak, useSpeak } from "@/store/useSpeech";
+import { Mic, Keyboard, X, Volume2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Question = {
@@ -11,6 +13,8 @@ type Question = {
 
 export function ScreenInterview() {
   const { nextScreen, updateCase, patientCase, language } = useStore();
+  const t = useT();
+  const { speak } = useSpeak();
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -90,6 +94,8 @@ export function ScreenInterview() {
   }, [complaintText, language]);
 
   const currentQ = questions[currentQIndex];
+  const questionText = currentQ ? t(currentQ.text) : "";
+  useAutoSpeak(questionText, currentQ?.text || "");
 
   const handleAnswer = (answer: string) => {
     if (!answer || !currentQ) return;
@@ -97,7 +103,6 @@ export function ScreenInterview() {
     const updatedAnswers = { ...answers, [currentQ.id]: answer };
     setAnswers(updatedAnswers);
 
-    // Save answered clinical details directly to Zustand state history
     updateCase({
       history: {
         ...patientCase.history,
@@ -203,10 +208,10 @@ export function ScreenInterview() {
           </div>
 
           <h2 className="text-[32px] font-serif tracking-tight text-[#000B33] mb-2">
-            Preparing your questions...
+            {t("Preparing your questions...")}
           </h2>
           <p className="text-[18px] text-[#000B33]/60 font-medium">
-            Please wait a moment while we set up your personalized intake.
+            {t("Please wait a moment while we set up your personalized intake.")}
           </p>
         </motion.div>
       </div>
@@ -228,9 +233,18 @@ export function ScreenInterview() {
         >
           {/* Header */}
           <div className="flex justify-between items-start w-full mb-12">
-            <h2 className="text-[38px] font-serif leading-[1.1] tracking-tight text-[#000B33] max-w-xl text-left">
-              {currentQ.text}
-            </h2>
+            <div className="max-w-xl text-left">
+              <h2 className="text-[38px] font-serif leading-[1.1] tracking-tight text-[#000B33] mb-2">
+                {questionText}
+              </h2>
+              <button
+                onClick={() => speak(questionText)}
+                className="inline-flex items-center gap-2 text-xs font-bold text-[#1C718A] uppercase hover:opacity-70 transition-opacity"
+              >
+                <Volume2 className="h-4 w-4" />
+                {t("Listen again")}
+              </button>
+            </div>
             
             <div className="flex gap-2 shrink-0 pt-3">
               {questions.map((_, i) => (
@@ -261,7 +275,7 @@ export function ScreenInterview() {
                     : "border-gray-200 hover:border-[#000B33] text-[#000B33] hover:shadow-md active:scale-[0.98]"
                 }`}
               >
-                {opt}
+                {t(opt)}
               </button>
             ))}
           </div>
@@ -277,7 +291,7 @@ export function ScreenInterview() {
                   autoFocus
                   value={typedAnswer}
                   onChange={(e) => setTypedAnswer(e.target.value)}
-                  placeholder="Type your clinical response here..."
+                  placeholder={t("Type your clinical response here...")}
                   className="w-full bg-white border border-gray-200 rounded-[20px] p-6 text-[19px] text-[#000B33] placeholder:text-[#000B33]/40 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#000B33]/20 focus:border-[#000B33]/50 min-h-[120px] resize-none mb-4"
                 />
                 <div className="flex gap-4 w-full max-w-md mx-auto">
@@ -286,14 +300,14 @@ export function ScreenInterview() {
                     onClick={() => setIsTyping(false)}
                     className="flex-1 py-4 rounded-[20px] bg-gray-100 text-[#000B33] font-semibold text-[18px] hover:bg-gray-200 transition-colors"
                   >
-                    Cancel
+                    {t("Cancel")}
                   </button>
                   <button
                     type="submit"
                     disabled={!typedAnswer.trim()}
                     className="flex-1 py-4 rounded-[20px] bg-[#000B33] text-white font-semibold text-[18px] hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Submit
+                    {t("Submit")}
                   </button>
                 </div>
               </form>
@@ -309,7 +323,7 @@ export function ScreenInterview() {
                       animate={{ opacity: 1, y: 0 }}
                       className="text-[20px] text-[#000B33] font-medium italic"
                     >
-                      "{transcript || "Listening..."}"
+                      "{transcript || t("Listening...")}"
                     </motion.p>
                   ) : null}
                 </div>
@@ -345,7 +359,7 @@ export function ScreenInterview() {
                     <Mic className="h-8 w-8 stroke-[2.5]" />
                   </div>
                   <span className="text-[18px] font-bold text-[#000B33]">
-                    {isListening ? "Submit Answer" : "Tap to speak"}
+                    {isListening ? t("Submit Answer") : t("Tap to speak")}
                   </span>
                 </button>
 
@@ -355,7 +369,7 @@ export function ScreenInterview() {
                     className="mt-4 flex items-center gap-2 text-[#000B33]/50 hover:text-[#000B33] font-semibold text-[16px] transition-colors py-2 px-6 rounded-full hover:bg-black/5"
                   >
                     <Keyboard className="h-4 w-4" />
-                    <span>I'd rather type</span>
+                    <span>{t("I'd rather type")}</span>
                   </button>
                 )}
               </div>

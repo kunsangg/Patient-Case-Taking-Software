@@ -27,15 +27,15 @@ export function ScreenAbhaProfile() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-[750px] w-full bg-[#FDFBF7]/95 backdrop-blur-3xl p-10 rounded-[32px] shadow-[0_8px_40px_rgb(0,0,0,0.08)] border border-white/50 flex flex-col"
+        className="max-w-[750px] w-full bg-white/95 backdrop-blur-3xl p-10 rounded-card shadow-card border border-white/60 flex flex-col"
       >
-        
+
         {/* Top Header Actions */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-[20px] font-bold text-[#000B33]">
+          <h2 className="text-title font-serif text-[#000B33]">
             Welcome, {fullName}
           </h2>
-          <div className="flex gap-4 text-[#D35400] text-[14px] font-medium">
+          <div className="flex gap-4 text-[#1C718A] text-[14px] font-medium">
             <button className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
               <Download size={16} /> Download ABHA card
             </button>
@@ -126,14 +126,14 @@ export function ScreenAbhaProfile() {
         <div className="flex justify-between items-center mt-10">
           <button
             onClick={() => setScreen(1)} // Go back
-            className="rounded-[20px] px-8 py-4 text-[17px] font-semibold transition-all bg-white text-[#000B33] border border-gray-200 hover:border-[#000B33]"
+            className="rounded-full px-8 py-4 text-body font-semibold transition-all duration-300 ease-premium bg-white text-[#000B33] border border-black/10 hover:border-[#000B33]/30"
           >
             Not me
           </button>
-          
+
           <button
             onClick={() => setScreen(2)} // Proceed to Consent
-            className="rounded-[20px] px-10 py-4 text-[18px] font-semibold transition-all bg-[#000B33] text-white hover:bg-black shadow-md active:scale-[0.98]"
+            className="rounded-full px-10 py-4 text-body font-semibold transition-all duration-300 ease-premium bg-[#000B33] text-white hover:bg-black active:scale-[0.98]"
           >
             Authorize & Proceed
           </button>

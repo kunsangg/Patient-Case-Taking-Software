@@ -1,5 +1,4 @@
 import { useStore } from "@/store/useStore";
-import { UserPlus, UserCircle } from "lucide-react";
 
 export function ScreenWelcome() {
   const { setScreen, setIsNewPatient } = useStore();
@@ -15,58 +14,50 @@ export function ScreenWelcome() {
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-10 pb-12 w-full">
-      <div className="max-w-[800px] w-full min-h-[700px] bg-[#FDFBF7]/95 backdrop-blur-3xl p-16 rounded-[40px] shadow-[0_8px_40px_rgb(0,0,0,0.08)] border border-white/50 flex flex-col items-center justify-between text-center">
-        
-        <div className="flex items-center gap-4 mb-auto">
-          <div className="flex h-14 w-14 items-center justify-center rounded-[14px] bg-[#000B33] text-white shadow-sm">
-            <span className="font-serif text-[28px] font-bold">M</span>
+      <div className="max-w-[760px] w-full min-h-[680px] bg-white/95 backdrop-blur-3xl p-16 rounded-card shadow-card border border-white/60 flex flex-col items-center justify-between text-center">
+
+        <div className="flex items-center gap-3.5 mb-auto">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-[#000B33] text-white">
+            <span className="font-serif text-[19px] font-bold">M</span>
           </div>
-          <div className="flex flex-col text-left">
-            <span className="text-[13px] font-bold tracking-[0.2em] text-[#000B33]/50 uppercase mb-0.5">
-              Hospital System
-            </span>
-            <span className="font-serif text-[22px] text-[#000B33] leading-none">
-              MediKiosk
-            </span>
-          </div>
+          <span className="font-serif text-[19px] text-[#000B33] leading-none">
+            MediKiosk
+          </span>
         </div>
 
         <div className="flex flex-col items-center max-w-2xl my-16">
-          <span className="text-[14px] font-bold tracking-[0.15em] text-[#000B33]/60 uppercase mb-8">
-            Patient Intake
-          </span>
-          <h1 className="text-[64px] font-serif leading-[1.1] tracking-tight text-[#000B33] mb-8">
-            Tell us how you're feeling.<br/>We'll listen.
+          <h1 className="text-hero font-serif text-[#000B33] mb-7">
+            Tell us how you're feeling.<br />We'll listen.
           </h1>
-          <p className="text-[22px] text-[#000B33]/60 font-medium leading-[1.5] max-w-[540px]">
+          <p className="text-body-lg text-[#000B33]/55 max-w-[480px]">
             A few calm questions before you see the doctor. Speak, tap, or both — at your pace.
           </p>
         </div>
 
-        <div className="flex flex-col items-center w-full max-w-[560px] gap-5">
+        <div className="flex flex-col items-center w-full max-w-[520px] gap-4">
           <button
             onClick={() => handleSelect(true)}
-            className="w-full rounded-full bg-[#000B33] py-[22px] text-[22px] font-semibold text-white transition-all hover:bg-black active:scale-[0.98] shadow-md"
+            className="w-full rounded-full bg-[#000B33] py-5 text-body font-semibold text-white transition-all duration-300 ease-premium hover:bg-black active:scale-[0.98]"
           >
             Get started
           </button>
-          
-          <div className="flex gap-4 w-full">
+
+          <div className="flex gap-3 w-full">
             <button
               onClick={() => handleSelect(false)}
-              className="flex-1 rounded-full bg-white border border-gray-200 py-[18px] text-[18px] font-semibold text-[#000B33] transition-all hover:border-[#000B33]/50 hover:bg-[#000B33]/5 active:scale-[0.98] shadow-sm"
+              className="flex-1 rounded-full bg-white border border-black/10 py-4 text-body font-medium text-[#000B33] transition-all duration-300 ease-premium hover:border-[#000B33]/30"
             >
               I have an ABHA ID
             </button>
             <button
               onClick={() => handleSelect(true)}
-              className="flex-1 rounded-full bg-white border border-gray-200 py-[18px] text-[18px] font-semibold text-[#000B33] transition-all hover:border-[#000B33]/50 hover:bg-[#000B33]/5 active:scale-[0.98] shadow-sm"
+              className="flex-1 rounded-full bg-white border border-black/10 py-4 text-body font-medium text-[#000B33] transition-all duration-300 ease-premium hover:border-[#000B33]/30"
             >
               I'm new here
             </button>
           </div>
         </div>
-        
+
       </div>
     </div>
   );
