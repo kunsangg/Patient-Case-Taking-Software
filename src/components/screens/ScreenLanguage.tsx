@@ -1,4 +1,6 @@
 import { useStore } from "@/store/useStore";
+import { useT } from "@/store/useTranslation";
+import { useAutoSpeak } from "@/store/useSpeech";
 
 const LANGUAGES = [
   { script: "हिन्दी", english: "Hindi" },
@@ -12,12 +14,20 @@ const LANGUAGES = [
   { script: "മലയാളം", english: "Malayalam" },
 ];
 
+const HEADLINE = "Please select your preferred language";
+const SUBTITLE = "Your entire intake experience will be translated in real-time.";
+
 export function ScreenLanguage() {
   const { setLanguage, setScreen } = useStore();
+  const t = useT();
+
+  const headline = t(HEADLINE);
+  const subtitle = t(SUBTITLE);
+  useAutoSpeak(`${headline}. ${subtitle}`, HEADLINE);
 
   const handleSelect = (lang: string) => {
     setLanguage(lang);
-    setScreen(4); // Go to Intake Home
+    setScreen(2); // Go to Welcome Screen
   };
 
   return (

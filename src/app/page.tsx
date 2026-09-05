@@ -29,9 +29,9 @@ export default function Home() {
 
   const renderScreen = () => {
     switch (currentScreen) {
-      case 1: return <ScreenWelcome key="welcome" />;
-      case 2: return <ScreenConsent key="consent" />;
-      case 3: return <ScreenLanguage key="language" />;
+      case 1: return <ScreenLanguage key="language" />;
+      case 2: return <ScreenWelcome key="welcome" />;
+      case 3: return <ScreenConsent key="consent" />;
       case 10: return <ScreenAbhaScan key="abha" />;
       case 11: return <ScreenAbhaProfile key="abhaprofile" />;
       case 4: return <ScreenIntakeHome key="intake" />;
@@ -40,7 +40,7 @@ export default function Home() {
       case 7: return <ScreenDocumentScan key="documents" />;
       case 8: return <ScreenReview key="review" />;
       case 9: return <ScreenComplete key="complete" />;
-      default: return <ScreenWelcome key="welcome" />;
+      default: return <ScreenLanguage key="language" />;
     }
   };
 

@@ -1,17 +1,25 @@
 import { useEffect } from "react";
 import { useStore } from "@/store/useStore";
 import { useT } from "@/store/useTranslation";
+import { useAutoSpeak } from "@/store/useSpeech";
+
+const HEADLINE = "Tell us how you're feeling. We'll listen.";
+const SUBTITLE = "A few calm questions before you see the doctor. Speak, tap, or both — at your pace.";
 
 export function ScreenWelcome() {
-  const { setScreen, setIsNewPatient, resetSession } = useStore();
+  const { setScreen, setIsNewPatient } = useStore();
   const t = useT();
+
+  const headlineText = t(HEADLINE);
+  const subtitleText = t(SUBTITLE);
+  useAutoSpeak(`${headlineText}. ${subtitleText}`, HEADLINE);
 
   const handleSelect = (isNew: boolean) => {
     setIsNewPatient(isNew);
     if (isNew) {
-      setScreen(2); // Consent
+      setScreen(3); // Consent (Screen 3)
     } else {
-      setScreen(10); // ABHA Scan
+      setScreen(10); // ABHA Scan (Screen 10)
     }
   };
 

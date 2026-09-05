@@ -69,13 +69,13 @@ export function ScreenAbhaScan() {
               console.log("ABHA KYC Verified:", params);
             },
             onConsentSuccess: () => {
-              if (isSubscribed) setScreen(2);
+              if (isSubscribed) setScreen(3);
             },
             onSkipAbha: () => {
-              if (isSubscribed) setScreen(2);
+              if (isSubscribed) setScreen(3);
             },
             onAbhaClose: () => {
-              if (isSubscribed) setScreen(1);
+              if (isSubscribed) setScreen(2);
             },
             onError: (params: any) => {
               console.error("ABHA Error:", params);
@@ -132,7 +132,7 @@ export function ScreenAbhaScan() {
     if (sdkMountRef.current) {
       sdkMountRef.current.innerHTML = "";
     }
-    setScreen(2);
+    setScreen(3);
   };
 
   return (

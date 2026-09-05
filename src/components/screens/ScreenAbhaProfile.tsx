@@ -125,14 +125,14 @@ export function ScreenAbhaProfile() {
         {/* Action Buttons */}
         <div className="flex justify-between items-center mt-10">
           <button
-            onClick={() => setScreen(1)} // Go back
+            onClick={() => setScreen(2)} // Go back to Welcome
             className="rounded-full px-8 py-4 text-body font-semibold transition-all duration-300 ease-premium bg-white text-[#000B33] border border-black/10 hover:border-[#000B33]/30"
           >
             Not me
           </button>
 
           <button
-            onClick={() => setScreen(2)} // Proceed to Consent
+            onClick={() => setScreen(3)} // Proceed to Consent
             className="rounded-full px-10 py-4 text-body font-semibold transition-all duration-300 ease-premium bg-[#000B33] text-white hover:bg-black active:scale-[0.98]"
           >
             Authorize & Proceed

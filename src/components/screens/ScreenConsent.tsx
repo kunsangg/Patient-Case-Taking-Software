@@ -1,7 +1,11 @@
 import { useStore } from "@/store/useStore";
 import { useT } from "@/store/useTranslation";
+import { useAutoSpeak } from "@/store/useSpeech";
 import { ShieldCheck, Mic, FileText } from "lucide-react";
 import { motion } from "framer-motion";
+
+const HEADLINE = "A quick word of trust";
+const SUBTITLE = "We'll only ask what helps the doctor understand you today. You can skip anything that feels too much.";
 
 const ITEMS = [
   { icon: Mic, title: "Your story, in your words", body: "We'll ask why you're here. Speak or tap — both reach the doctor the same way." },
@@ -12,6 +16,10 @@ const ITEMS = [
 export function ScreenConsent() {
   const nextScreen = useStore((state) => state.nextScreen);
   const t = useT();
+
+  const headlineText = t(HEADLINE);
+  const subtitleText = t(SUBTITLE);
+  useAutoSpeak(`${headlineText}. ${subtitleText}`, HEADLINE);
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-10 pb-12">
