@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useStore } from "@/store/useStore";
-import { Mic, Keyboard, X } from "lucide-react";
+import { Mic, Keyboard, X, Sparkles, BrainCircuit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Question = {
@@ -9,52 +9,104 @@ type Question = {
   options: string[];
 };
 
-const QUESTIONS: Question[] = [
-  {
-    id: "duration",
-    text: "Could you specify when these symptoms first appeared?",
-    options: ["Today", "Yesterday", "3 days ago", "A week ago", "Not sure"]
-  },
-  {
-    id: "quality",
-    text: "How would you characterize the nature of your discomfort?",
-    options: ["Pressure", "Burning", "Sharp", "Tightness", "Other"]
-  },
-  {
-    id: "radiation",
-    text: "Does the discomfort radiate to any other regions?",
-    options: ["Left arm", "Right arm", "Back", "Jaw", "Nowhere", "Not sure"]
-  }
-];
-
 export function ScreenInterview() {
-  const { nextScreen, updateCase } = useStore();
+  const { nextScreen, updateCase, patientCase, language } = useStore();
+
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentQIndex, setCurrentQIndex] = useState(0);
-  const [history, setHistory] = useState<{q: string, a: string}[]>([]);
-  
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+
   const [isTyping, setIsTyping] = useState(false);
   const [typedAnswer, setTypedAnswer] = useState("");
-  
+
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
 
-  const currentQ = QUESTIONS[currentQIndex];
+  const complaintText = patientCase.chiefComplaint?.[0]?.symptom || "unspecified symptom";
+
+  // Fetch Groq dynamic questions when component mounts or symptom changes
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchGroqQuestions = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch("/api/questions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chiefComplaint: patientCase.chiefComplaint,
+            language: language || "English",
+            history: patientCase.history || {}
+          })
+        });
+
+        const data = await res.json();
+        if (isMounted && data.questions && data.questions.length > 0) {
+          setQuestions(data.questions);
+        } else if (isMounted) {
+          setQuestions([
+            {
+              id: "onset",
+              text: `Could you tell us when your ${complaintText} started?`,
+              options: ["Today", "Yesterday", "3-4 days ago", "Over a week ago"]
+            },
+            {
+              id: "severity",
+              text: "How severe would you describe your discomfort right now?",
+              options: ["Mild", "Moderate", "Severe", "Very severe"]
+            }
+          ]);
+        }
+      } catch (error) {
+        console.error("Failed to load Groq interview questions:", error);
+        if (isMounted) {
+          setQuestions([
+            {
+              id: "onset",
+              text: `When did your ${complaintText} start?`,
+              options: ["Today", "Yesterday", "3-4 days ago", "A week ago"]
+            },
+            {
+              id: "severity",
+              text: "How would you rate the severity of your pain or discomfort?",
+              options: ["Mild", "Moderate", "Severe", "Unbearable"]
+            }
+          ]);
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchGroqQuestions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [complaintText, language]);
+
+  const currentQ = questions[currentQIndex];
 
   const handleAnswer = (answer: string) => {
-    if (!answer) return;
-    
-    const newHistory = [...history, { q: currentQ.text, a: answer }];
-    
-    // Save to global state (simple mapping)
-    if (currentQ.id === "duration") updateCase({ history: { duration: answer } });
-    if (currentQ.id === "quality") updateCase({ history: { quality: answer } });
-    if (currentQ.id === "radiation") updateCase({ history: { radiation: answer } });
+    if (!answer || !currentQ) return;
 
-    if (currentQIndex < QUESTIONS.length - 1) {
-      setHistory(newHistory);
-      setCurrentQIndex(currentQIndex + 1);
+    const updatedAnswers = { ...answers, [currentQ.id]: answer };
+    setAnswers(updatedAnswers);
+
+    // Save answered clinical details directly to Zustand state history
+    updateCase({
+      history: {
+        ...patientCase.history,
+        [currentQ.id]: answer
+      }
+    });
+
+    if (currentQIndex < questions.length - 1) {
+      setCurrentQIndex((prev) => prev + 1);
       setIsTyping(false);
       setTypedAnswer("");
       setTranscript("");
@@ -73,9 +125,10 @@ export function ScreenInterview() {
 
   const startListening = () => {
     setVoiceError(null);
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      setVoiceError("Your browser does not support voice recognition. Please use Chrome.");
+      setVoiceError("Voice recognition requires Google Chrome or Microsoft Edge.");
       return;
     }
 
@@ -86,22 +139,16 @@ export function ScreenInterview() {
     try {
       const recognition = new SpeechRecognition();
       recognitionRef.current = recognition;
-      recognition.continuous = true; // Stay open until they click submit
+      recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = "en-US";
+      recognition.lang = language === "Hindi" ? "hi-IN" : "en-US";
 
       recognition.onstart = () => {
-        console.log("SpeechRecognition: started");
         setIsListening(true);
         setTranscript("");
       };
 
-      recognition.onspeechstart = () => {
-        console.log("SpeechRecognition: speech detected");
-      };
-
       recognition.onresult = (event: any) => {
-        console.log("SpeechRecognition: onresult fired", event);
         let fullTranscript = "";
         for (let i = 0; i < event.results.length; i++) {
           fullTranscript += event.results[i][0].transcript;
@@ -110,19 +157,18 @@ export function ScreenInterview() {
       };
 
       recognition.onend = () => {
-        console.log("SpeechRecognition: ended");
         setIsListening(false);
       };
 
       recognition.onerror = (event: any) => {
-        console.error("Speech recognition error", event.error);
+        console.error("Speech recognition error:", event.error);
         setVoiceError(`Microphone error: ${event.error}`);
         setIsListening(false);
       };
 
       recognition.start();
     } catch (err: any) {
-      setVoiceError(`Failed to start mic: ${err.message}`);
+      setVoiceError(`Failed to start microphone: ${err.message}`);
     }
   };
 
@@ -143,42 +189,75 @@ export function ScreenInterview() {
     setIsListening(false);
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex h-full flex-col px-10 pb-12 items-center justify-center w-full">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-[#FDFBF7]/95 backdrop-blur-3xl rounded-[40px] p-16 shadow-[0_8px_40px_rgb(0,0,0,0.08)] border border-white/50 flex flex-col items-center justify-center text-center max-w-xl w-full"
+        >
+          <div className="h-16 w-16 bg-[#000B33] rounded-full flex items-center justify-center mb-6 shadow-md">
+            <div className="h-8 w-8 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+          </div>
+
+          <h2 className="text-[32px] font-serif tracking-tight text-[#000B33] mb-2">
+            Preparing your questions...
+          </h2>
+          <p className="text-[18px] text-[#000B33]/60 font-medium">
+            Please wait a moment while we set up your personalized intake.
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (!currentQ) return null;
+
   return (
     <div className="flex h-full flex-col items-center justify-center px-10 pb-12 w-full">
       <AnimatePresence mode="wait">
-        <motion.div 
-          key={currentQ.id}
+        <motion.div
+          key={currentQ.id || currentQIndex}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.3 }}
           className="bg-[#FDFBF7]/95 backdrop-blur-3xl rounded-[40px] p-12 shadow-[0_8px_40px_rgb(0,0,0,0.08)] border border-white/50 flex flex-col items-center w-full max-w-[800px] min-h-[600px]"
         >
+          {/* Header */}
           <div className="flex justify-between items-start w-full mb-12">
             <h2 className="text-[38px] font-serif leading-[1.1] tracking-tight text-[#000B33] max-w-xl text-left">
               {currentQ.text}
             </h2>
+            
             <div className="flex gap-2 shrink-0 pt-3">
-              {QUESTIONS.map((_, i) => (
-                <div 
-                  key={i} 
+              {questions.map((_, i) => (
+                <div
+                  key={i}
                   className={`h-2.5 w-2.5 rounded-full transition-colors ${
-                    i === currentQIndex ? "bg-[#000B33]" : i < currentQIndex ? "bg-[#000B33]/30" : "bg-gray-200"
-                  }`} 
+                    i === currentQIndex
+                      ? "bg-[#000B33]"
+                      : i < currentQIndex
+                      ? "bg-[#000B33]/30"
+                      : "bg-gray-200"
+                  }`}
                 />
               ))}
             </div>
           </div>
 
+          {/* Quick Option Buttons */}
           <div className="grid grid-cols-2 gap-4 w-full mb-auto">
-            {currentQ.options.map((opt) => (
+            {currentQ.options?.map((opt) => (
               <button
                 key={opt}
                 onClick={() => handleAnswer(opt)}
                 disabled={isListening}
-                className={`py-5 px-6 text-[19px] font-semibold rounded-[20px] bg-white border shadow-sm transition-all text-left ${
-                  isListening 
-                    ? "border-gray-100 text-gray-300 cursor-not-allowed opacity-50" 
+                className={`py-5 px-6 text-[18px] font-semibold rounded-[20px] bg-white border shadow-sm transition-all text-left ${
+                  isListening
+                    ? "border-gray-100 text-gray-300 cursor-not-allowed opacity-50"
                     : "border-gray-200 hover:border-[#000B33] text-[#000B33] hover:shadow-md active:scale-[0.98]"
                 }`}
               >
@@ -188,14 +267,17 @@ export function ScreenInterview() {
           </div>
 
           {/* Bottom Area: Voice, Typing, or Live Transcript */}
-          <div className="w-full mt-10 flex flex-col items-center justify-center min-h-[220px]">
+          <div className="w-full mt-8 flex flex-col items-center justify-center min-h-[200px]">
             {isTyping ? (
-              <form onSubmit={handleTypeSubmit} className="w-full flex flex-col items-center animate-in fade-in zoom-in duration-300">
+              <form
+                onSubmit={handleTypeSubmit}
+                className="w-full flex flex-col items-center animate-in fade-in zoom-in duration-300"
+              >
                 <textarea
                   autoFocus
                   value={typedAnswer}
                   onChange={(e) => setTypedAnswer(e.target.value)}
-                  placeholder="Type your answer here..."
+                  placeholder="Type your clinical response here..."
                   className="w-full bg-white border border-gray-200 rounded-[20px] p-6 text-[19px] text-[#000B33] placeholder:text-[#000B33]/40 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#000B33]/20 focus:border-[#000B33]/50 min-h-[120px] resize-none mb-4"
                 />
                 <div className="flex gap-4 w-full max-w-md mx-auto">
@@ -217,61 +299,68 @@ export function ScreenInterview() {
               </form>
             ) : (
               <div className="flex flex-col items-center">
-                
                 {/* Live Transcript Display */}
-                <div className="h-[60px] flex flex-col items-center justify-center mb-4 px-4 w-full text-center">
+                <div className="h-[50px] flex flex-col items-center justify-center mb-3 px-4 w-full text-center">
                   {voiceError ? (
-                    <p className="text-[17px] text-red-500 font-medium">{voiceError}</p>
+                    <p className="text-[16px] text-red-500 font-medium">{voiceError}</p>
                   ) : isListening ? (
-                    <motion.p 
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                      className="text-[22px] text-[#000B33] font-medium italic"
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-[20px] text-[#000B33] font-medium italic"
                     >
                       "{transcript || "Listening..."}"
                     </motion.p>
                   ) : null}
                 </div>
 
-                {/* The Circular Voice Button from User's Design */}
+                {/* Circular Voice Button */}
                 <button
                   onClick={isListening ? stopAndSubmit : startListening}
-                  className={`relative flex flex-col items-center justify-center h-[200px] w-[200px] rounded-full bg-white shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-gray-100 transition-all group ${
-                    isListening ? "scale-105 shadow-[0_8px_40px_rgb(44,95,85,0.2)] border-[#2C5F55]/20 ring-4 ring-[#2C5F55]/10" : "hover:scale-[1.02] active:scale-[0.98]"
+                  className={`relative flex flex-col items-center justify-center h-[180px] w-[180px] rounded-full bg-white shadow-[0_8px_40px_rgb(0,0,0,0.06)] border border-gray-100 transition-all group ${
+                    isListening
+                      ? "scale-105 shadow-[0_8px_40px_rgb(44,95,85,0.2)] border-[#2C5F55]/20 ring-4 ring-[#2C5F55]/10"
+                      : "hover:scale-[1.02] active:scale-[0.98]"
                   }`}
                 >
                   {isListening && (
-                    <span 
-                      onClick={(e) => { e.stopPropagation(); stopListening(); }}
-                      className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 hover:text-black z-10"
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        stopListening();
+                      }}
+                      className="absolute top-3 right-3 p-2 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 hover:text-black z-10"
                     >
                       <X size={16} />
                     </span>
                   )}
-                  
-                  <div className={`flex items-center justify-center h-[88px] w-[88px] rounded-full mb-3 transition-colors ${
-                    isListening ? "bg-[#2C5F55] text-white animate-pulse" : "bg-[#F0F7F6] text-[#2C5F55] group-hover:bg-[#E2F0ED]"
-                  }`}>
-                    <Mic className="h-9 w-9 stroke-[2.5]" />
+
+                  <div
+                    className={`flex items-center justify-center h-[76px] w-[76px] rounded-full mb-2 transition-colors ${
+                      isListening
+                        ? "bg-[#2C5F55] text-white animate-pulse"
+                        : "bg-[#F0F7F6] text-[#2C5F55] group-hover:bg-[#E2F0ED]"
+                    }`}
+                  >
+                    <Mic className="h-8 w-8 stroke-[2.5]" />
                   </div>
-                  <span className="text-[20px] font-bold text-[#000B33]">
+                  <span className="text-[18px] font-bold text-[#000B33]">
                     {isListening ? "Submit Answer" : "Tap to speak"}
                   </span>
                 </button>
 
                 {!isListening && (
-                  <button 
+                  <button
                     onClick={() => setIsTyping(true)}
-                    className="mt-6 flex items-center gap-2 text-[#000B33]/50 hover:text-[#000B33] font-semibold text-[17px] transition-colors py-2 px-6 rounded-full hover:bg-black/5"
+                    className="mt-4 flex items-center gap-2 text-[#000B33]/50 hover:text-[#000B33] font-semibold text-[16px] transition-colors py-2 px-6 rounded-full hover:bg-black/5"
                   >
-                    <Keyboard className="h-5 w-5" />
+                    <Keyboard className="h-4 w-4" />
                     <span>I'd rather type</span>
                   </button>
                 )}
-
               </div>
             )}
           </div>
-
         </motion.div>
       </AnimatePresence>
     </div>

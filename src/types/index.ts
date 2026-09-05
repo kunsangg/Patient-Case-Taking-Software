@@ -1,19 +1,13 @@
 export interface PatientCase {
   patientId: string;
+  patientName?: string;
   encounterId: string;
   chiefComplaint: {
     symptom: string;
     duration?: string;
     severity?: number;
   }[];
-  history: {
-    onset?: string;
-    character?: string;
-    location?: string;
-    radiation?: string;
-    aggravatingFactors?: string;
-    relievingFactors?: string;
-  };
+  history: Record<string, string>;
   medications: Medication[];
   allergies: string[];
   pastHistory: string[];
