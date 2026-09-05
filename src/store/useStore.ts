@@ -17,30 +17,32 @@ interface AppState {
   resetSession: () => void;
 }
 
-const initialCase: PatientCase = {
-  patientId: '',
-  encounterId: '',
-  chiefComplaint: [],
-  history: {},
-  medications: [],
-  allergies: [],
-  pastHistory: [],
-  familyHistory: [],
-  personalHistory: [],
-  investigations: [],
-  procedures: [],
-  documents: [],
-  timeline: [],
-  alerts: [],
-  missingInformation: [],
-  contradictions: [],
-  aiAnalysis: {
-    triageLevel: "Low",
-    clinicalSummary: '',
-    differentialDiagnosis: [],
-    recommendedQuestions: [],
-  },
-};
+function createInitialCase(): PatientCase {
+  return {
+    patientId: '',
+    encounterId: '',
+    chiefComplaint: [],
+    history: {},
+    medications: [],
+    allergies: [],
+    pastHistory: [],
+    familyHistory: [],
+    personalHistory: [],
+    investigations: [],
+    procedures: [],
+    documents: [],
+    timeline: [],
+    alerts: [],
+    missingInformation: [],
+    contradictions: [],
+    aiAnalysis: {
+      triageLevel: "Low",
+      clinicalSummary: '',
+      differentialDiagnosis: [],
+      recommendedQuestions: [],
+    },
+  };
+}
 
 export const useStore = create<AppState & { screenHistory: number[] }>((set) => ({
   currentScreen: 1,
@@ -48,7 +50,7 @@ export const useStore = create<AppState & { screenHistory: number[] }>((set) => 
   language: 'English',
   isNewPatient: null,
   abhaProfile: null,
-  patientCase: initialCase,
+  patientCase: createInitialCase(),
   
   setScreen: (screen) => set((state) => ({ 
     screenHistory: [...state.screenHistory, state.currentScreen],
@@ -78,12 +80,13 @@ export const useStore = create<AppState & { screenHistory: number[] }>((set) => 
     patientCase: { ...state.patientCase, ...data } 
   })),
   
+  // Enforces complete stateless isolation & data purging between patient sessions
   resetSession: () => set({
     currentScreen: 1,
     screenHistory: [],
     language: 'English',
     isNewPatient: null,
     abhaProfile: null,
-    patientCase: initialCase,
+    patientCase: createInitialCase(),
   }),
 }));

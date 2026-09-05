@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import { useStore } from "@/store/useStore";
 import { useT } from "@/store/useTranslation";
 
 export function ScreenWelcome() {
-  const { setScreen, setIsNewPatient } = useStore();
+  const { setScreen, setIsNewPatient, resetSession } = useStore();
   const t = useT();
 
   const handleSelect = (isNew: boolean) => {
