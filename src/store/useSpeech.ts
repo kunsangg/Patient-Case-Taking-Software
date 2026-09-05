@@ -72,13 +72,15 @@ export function useSpeak() {
   }, []);
 
   const speak = useCallback(
-    async (text: string, onEnd?: () => void) => {
+    async (text: string, onEnd?: () => void, overrideLanguage?: string) => {
       if (!text) {
         if (onEnd) onEnd();
         return;
       }
       stop();
       setIsSpeaking(true);
+
+      const targetLanguage = overrideLanguage || language;
 
       const handleFinished = () => {
         setIsSpeaking(false);
@@ -90,7 +92,7 @@ export function useSpeak() {
         const res = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, language })
+          body: JSON.stringify({ text, language: targetLanguage })
         });
 
         const contentType = res.headers.get('content-type') || '';
@@ -108,17 +110,17 @@ export function useSpeak() {
           };
 
           audio.onerror = () => {
-            speakBrowserFallback(text, language, handleFinished);
+            speakBrowserFallback(text, targetLanguage, handleFinished);
           };
 
           await audio.play();
           return;
         }
 
-        speakBrowserFallback(text, language, handleFinished);
+        speakBrowserFallback(text, targetLanguage, handleFinished);
       } catch (err) {
         console.warn("ElevenLabs TTS failed, using fallback:", err);
-        speakBrowserFallback(text, language, handleFinished);
+        speakBrowserFallback(text, targetLanguage, handleFinished);
       }
     },
     [language, stop]

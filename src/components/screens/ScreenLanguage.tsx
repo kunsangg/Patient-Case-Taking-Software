@@ -1,6 +1,6 @@
+import { useEffect } from "react";
 import { useStore } from "@/store/useStore";
-import { useT } from "@/store/useTranslation";
-import { useAutoSpeak } from "@/store/useSpeech";
+import { useSpeak } from "@/store/useSpeech";
 
 const LANGUAGES = [
   { script: "हिन्दी", english: "Hindi" },
@@ -14,16 +14,18 @@ const LANGUAGES = [
   { script: "മലയാളം", english: "Malayalam" },
 ];
 
-const HEADLINE = "Please select your preferred language";
-const SUBTITLE = "Your entire intake experience will be translated in real-time.";
+const HINDI_NARRATION = "कृपया अपनी पसंदीदा भाषा चुनें। आपका पूरा अनुभव आपकी भाषा में अनुवादित किया जाएगा।";
 
 export function ScreenLanguage() {
   const { setLanguage, setScreen } = useStore();
-  const t = useT();
+  const { speak } = useSpeak();
 
-  const headline = t(HEADLINE);
-  const subtitle = t(SUBTITLE);
-  useAutoSpeak(`${headline}. ${subtitle}`, HEADLINE);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      speak(HINDI_NARRATION, undefined, "Hindi");
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [speak]);
 
   const handleSelect = (lang: string) => {
     setLanguage(lang);
