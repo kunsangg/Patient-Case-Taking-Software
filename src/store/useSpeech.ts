@@ -24,7 +24,10 @@ function pickVoice(langCode: string): SpeechSynthesisVoice | undefined {
 }
 
 function speakBrowserFallback(text: string, language: string, onEnd: () => void) {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window) || !text) return;
+  if (typeof window === 'undefined' || !('speechSynthesis' in window) || !text) {
+    onEnd();
+    return;
+  }
   window.speechSynthesis.cancel();
 
   const langCode = LANG_CODES[language] || 'en-US';
@@ -69,10 +72,19 @@ export function useSpeak() {
   }, []);
 
   const speak = useCallback(
-    async (text: string) => {
-      if (!text) return;
+    async (text: string, onEnd?: () => void) => {
+      if (!text) {
+        if (onEnd) onEnd();
+        return;
+      }
       stop();
       setIsSpeaking(true);
+
+      const handleFinished = () => {
+        setIsSpeaking(false);
+        cleanupAudio();
+        if (onEnd) onEnd();
+      };
 
       try {
         const res = await fetch('/api/tts', {
@@ -92,25 +104,21 @@ export function useSpeak() {
           activeAudio = audio;
 
           audio.onended = () => {
-            setIsSpeaking(false);
-            cleanupAudio();
+            handleFinished();
           };
 
           audio.onerror = () => {
-            setIsSpeaking(false);
-            cleanupAudio();
-            speakBrowserFallback(text, language, () => setIsSpeaking(false));
+            speakBrowserFallback(text, language, handleFinished);
           };
 
           await audio.play();
           return;
         }
 
-        speakBrowserFallback(text, language, () => setIsSpeaking(false));
+        speakBrowserFallback(text, language, handleFinished);
       } catch (err) {
         console.warn("ElevenLabs TTS failed, using fallback:", err);
-        cleanupAudio();
-        speakBrowserFallback(text, language, () => setIsSpeaking(false));
+        speakBrowserFallback(text, language, handleFinished);
       }
     },
     [language, stop]
@@ -127,8 +135,9 @@ export function useSpeak() {
 
 /**
  * Auto-speaks `text` whenever it changes, once it's actually ready to be heard.
+ * Accepts an optional `onEnd` callback that fires when audio finishes playing.
  */
-export function useAutoSpeak(text: string, sourceText: string) {
+export function useAutoSpeak(text: string, sourceText: string, onEnd?: () => void) {
   const language = useStore((s) => s.language);
   const { speak } = useSpeak();
   const lastSpoken = useRef<string>('');
@@ -137,6 +146,6 @@ export function useAutoSpeak(text: string, sourceText: string) {
     const ready = language === 'English' || text !== sourceText;
     if (!ready || !text || lastSpoken.current === text) return;
     lastSpoken.current = text;
-    speak(text);
-  }, [text, sourceText, language, speak]);
+    speak(text, onEnd);
+  }, [text, sourceText, language, speak, onEnd]);
 }

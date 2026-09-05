@@ -16,14 +16,19 @@ export function ScreenComplete() {
   const headlineText = t(HEADLINE);
   const voiceExplanationText = t(VOICE_EXPLANATION);
 
-  // Automatically speak the clear waiting room queue instruction in selected language
-  useAutoSpeak(voiceExplanationText, VOICE_EXPLANATION);
+  // Automatically speak the clear waiting room queue instruction and return to start screen upon completion
+  useAutoSpeak(voiceExplanationText, VOICE_EXPLANATION, () => {
+    // 2.5 second pause after narration ends, then reset session back to beginning screen
+    setTimeout(() => {
+      resetSession();
+    }, 2500);
+  });
 
   useEffect(() => {
-    // Reset session state after 20 seconds so kiosk is clean for the next patient
+    // Backup safety timer: reset session after 15 seconds if audio fails or is muted
     const timer = setTimeout(() => {
       resetSession();
-    }, 20000);
+    }, 15000);
     return () => clearTimeout(timer);
   }, [resetSession]);
 
