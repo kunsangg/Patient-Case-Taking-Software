@@ -267,24 +267,24 @@ export function ScreenBodyMap() {
                     {/* Pin Target Marker exactly at (cx, cy) */}
                     {isSelected ? (
                       <g>
-                        {/* Outer Pulsing Ring */}
+                        {/* Static Clean Target Marker Ring */}
                         <circle
                           cx={region.cx}
                           cy={region.cy}
-                          r="18"
-                          className="fill-[#1C718A]/30 stroke-white stroke-2 animate-ping"
+                          r="12"
+                          className="fill-[#1C718A]/30 stroke-white stroke-2"
                         />
                         {/* Inner Pin Target Dot */}
                         <circle
                           cx={region.cx}
                           cy={region.cy}
-                          r="8"
-                          className="fill-white stroke-[#000B33] stroke-2 shadow-md"
+                          r="7"
+                          className="fill-white stroke-[#000B33] stroke-2"
                         />
                         <circle
                           cx={region.cx}
                           cy={region.cy}
-                          r="4"
+                          r="3.5"
                           className="fill-[#1C718A]"
                         />
                       </g>

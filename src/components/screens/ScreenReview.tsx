@@ -122,7 +122,7 @@ export function ScreenReview() {
           className="bg-white/95 backdrop-blur-3xl rounded-card p-16 shadow-card border border-white/60 flex flex-col items-center justify-center text-center max-w-xl w-full"
         >
           <div className="relative mb-8 flex items-center justify-center">
-            <div className="absolute inset-0 bg-[#1C718A]/20 rounded-full animate-ping" />
+            <div className="absolute inset-0 bg-[#1C718A]/20 rounded-full animate-pulse scale-110" />
             <div className="h-24 w-24 bg-[#000B33] rounded-full flex items-center justify-center relative z-10">
               <BrainCircuit className="h-11 w-11 text-white animate-pulse" />
             </div>
